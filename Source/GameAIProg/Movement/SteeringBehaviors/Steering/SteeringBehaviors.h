@@ -55,4 +55,7 @@ public:
 	
 	//steering
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+	
+	float OriginalMaxLinearSpeed{};
+	bool OriginalSpeedIsSet{ false };
 };
