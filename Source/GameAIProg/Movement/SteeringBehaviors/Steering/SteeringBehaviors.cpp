@@ -62,10 +62,10 @@ SteeringOutput Flee::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 // ARRIVE
 SteeringOutput Arrive::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
-	if (!OriginalSpeedIsSet)
+	if (!m_OriginalSpeedIsSet)
 	{
-		OriginalMaxLinearSpeed = Agent.GetMaxLinearSpeed();
-		OriginalSpeedIsSet = true;
+		m_OriginalMaxLinearSpeed = Agent.GetMaxLinearSpeed();
+		m_OriginalSpeedIsSet = true;
 	}
 	
 	SteeringOutput Steering{};
@@ -78,7 +78,7 @@ SteeringOutput Arrive::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	
 	if (DistToTarget > SlowRadius) // full speed
 	{
-		Agent.SetMaxLinearSpeed(OriginalMaxLinearSpeed);
+		Agent.SetMaxLinearSpeed(m_OriginalMaxLinearSpeed);
 	}
 	else if (DistToTarget < SlowRadius && DistToTarget > TargetRadius) // slow down
 	{
@@ -147,4 +147,31 @@ SteeringOutput Evade::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	}
 	
 	return Steering;
+}
+
+// WANDER
+SteeringOutput Wander::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
+{
+	FVector2D CenterWanderCircle{ Agent.GetPosition() + Agent.GetLinearVelocity().GetSafeNormal() * m_OffsetDistance };
+	float angleRad{ (rand() % 360) / 180.f * PI };
+	if (abs((angleRad - m_WanderAngle)) > m_MaxAngleChange)
+	{
+		if (angleRad > m_WanderAngle) 
+			angleRad = m_WanderAngle + m_MaxAngleChange;
+		else if (angleRad < m_WanderAngle)
+			angleRad = m_WanderAngle - m_MaxAngleChange;
+	}
+	
+	m_WanderAngle = angleRad;
+	
+	FVector2D WanderPos{ CenterWanderCircle.X + cos(angleRad) * m_Radius, 
+						 CenterWanderCircle.Y + sin(angleRad) * m_Radius };
+	Target.Position = WanderPos;
+	
+	if (Agent.GetDebugRenderingEnabled())
+	{
+		DrawTopDownDebugCircle(Agent, FVector(CenterWanderCircle.X, CenterWanderCircle.Y, 1), m_Radius, FColor(0, 0, 255, 255));
+	}
+	
+	return Seek::CalculateSteering(DeltaT, Agent);
 }

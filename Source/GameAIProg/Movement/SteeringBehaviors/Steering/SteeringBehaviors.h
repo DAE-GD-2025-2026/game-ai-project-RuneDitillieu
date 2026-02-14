@@ -56,8 +56,9 @@ public:
 	//steering
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
 	
-	float OriginalMaxLinearSpeed{};
-	bool OriginalSpeedIsSet{ false };
+protected:
+	float m_OriginalMaxLinearSpeed{};
+	bool m_OriginalSpeedIsSet{ false };
 };
 
 class Face : public  ISteeringBehavior
@@ -88,4 +89,24 @@ public:
 	
 	//steering
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+};
+
+class Wander : public  Seek
+{
+public:
+	Wander() = default;
+	virtual ~Wander() override = default;
+	
+	//steering
+	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+	
+	void SetWanderOffset(float offset) { m_OffsetDistance = offset; };
+	void SetWanderRadius(float radius) { m_Radius = radius; };
+	void SetMaxAngleChange(float rad) { m_MaxAngleChange = rad; };
+	
+protected:	
+	float m_OffsetDistance{ 160.f }; // dist to circle center
+	float m_Radius{ 100.f }; // radius of the circle
+	float m_MaxAngleChange{ 15.f / 180.f * PI }; // max allowed diff btwn calcd angles
+	float m_WanderAngle{ 0.f }; // last calculated angle
 };
