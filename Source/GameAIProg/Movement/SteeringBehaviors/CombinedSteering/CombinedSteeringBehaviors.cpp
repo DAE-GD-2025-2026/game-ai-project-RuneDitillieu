@@ -13,10 +13,46 @@ SteeringOutput BlendedSteering::CalculateSteering(float DeltaT, ASteeringAgent& 
 {
 	SteeringOutput BlendedSteering = {};
 	// TODO: Calculate the weighted average steeringbehavior
+	for (WeightedBehavior wb : WeightedBehaviors)
+	{
+		if (wb.Weight >= 0.01f)
+		{
+			SteeringOutput Steering{wb.pBehavior->CalculateSteering(DeltaT, Agent)};
+			BlendedSteering.LinearVelocity += Steering.LinearVelocity * wb.Weight;
+			BlendedSteering.AngularVelocity += Steering.AngularVelocity * wb.Weight;
+		}
+	}
+	BlendedSteering.LinearVelocity.Normalize();
+	BlendedSteering.AngularVelocity /= abs(BlendedSteering.AngularVelocity);
 	
 	// TODO: Add debug drawing
-
+	if (Agent.GetDebugRenderingEnabled())
+	{
+		// Velocity
+		const FVector2D EndPoint2{Agent.GetPosition() + Agent.GetLinearVelocity() * 0.5f};
+		DrawDebugLine(Agent.GetWorld(), FVector(Agent.GetPosition().X, Agent.GetPosition().Y, 1), 
+			FVector(EndPoint2.X, EndPoint2.Y, 1), FColor(255, 0, 255, 255)); 
+	
+		// Desired Direction
+		const FVector2D EndPoint1{ Agent.GetPosition() + (BlendedSteering.LinearVelocity * 300)};
+		DrawDebugLine(Agent.GetWorld(), FVector(Agent.GetPosition().X, Agent.GetPosition().Y, 1), 
+			FVector(EndPoint1.X, EndPoint1.Y, 1), FColor(0, 255, 0, 255)); 
+	
+		// Steering
+		const FVector2D EndPoint3{ Agent.GetPosition() + (EndPoint1 - EndPoint2)};
+		DrawDebugLine(Agent.GetWorld(), FVector(Agent.GetPosition().X, Agent.GetPosition().Y, 1), 
+			FVector(EndPoint3.X, EndPoint3.Y, 1), FColor(0, 255, 255, 255));
+	}
+	
 	return BlendedSteering;
+}
+
+void BlendedSteering::SetTarget(const FTargetData& NewTarget)
+{
+	for (WeightedBehavior wb : WeightedBehaviors)
+	{
+		wb.pBehavior->SetTarget(NewTarget);
+	}
 }
 
 float* BlendedSteering::GetWeight(ISteeringBehavior* const SteeringBehavior)

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <memory>
 #include "CoreMinimal.h"
 #include "CombinedSteeringBehaviors.h"
 #include "GameAIProg/Shared/Level_Base.h"
@@ -32,5 +33,14 @@ private:
 	bool UseMouseTarget = false;
 	bool CanDebugRender = false;
 
-	
+	//Behaviors
+	ISteeringBehavior* pSeekBehavior{ new Seek() };
+	ISteeringBehavior* pWanderBehavior{ new Wander() };
+	ISteeringBehavior* pFleeBehavior{ new Flee() };
+	ISteeringBehavior* pArriveBehavior{ new Arrive() };
+	ISteeringBehavior* pEvadeBehavior{ new Evade() };
+	ISteeringBehavior* pPursuitBehavior{ new Pursuit() };
+	ISteeringBehavior* pFaceBehavior{ new Face() };
+	BlendedSteering* pBlendedSteering{ nullptr };
+	ASteeringAgent* pSteeringAgent{ nullptr };
 };

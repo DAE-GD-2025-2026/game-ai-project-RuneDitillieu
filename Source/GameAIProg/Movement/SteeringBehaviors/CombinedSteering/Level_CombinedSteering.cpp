@@ -8,19 +8,43 @@ ALevel_CombinedSteering::ALevel_CombinedSteering()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	
 }
 
 // Called when the game starts or when spawned
 void ALevel_CombinedSteering::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
+	//Create BlendedSteering
+	std::vector<BlendedSteering::WeightedBehavior> WeightedBehaviors{};
+	//WeightedBehaviors.reserve(7);
+	WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pSeekBehavior, 0.5f));
+	WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pWanderBehavior, 0.5f));
+	// WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pFleeBehavior, 0.f));
+	// WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pArriveBehavior, 0.f));
+	// WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pEvadeBehavior, 0.f));
+	// WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pPursuitBehavior, 0.f));
+	// WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pFaceBehavior, 0.f));
+	pBlendedSteering = new BlendedSteering(std::move(WeightedBehaviors));
+	
+	pSteeringAgent = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, FVector{0,0,90}, FRotator::ZeroRotator);
+	pSteeringAgent->SetSteeringBehavior(pBlendedSteering);
 }
 
 void ALevel_CombinedSteering::BeginDestroy()
 {
+	delete pBlendedSteering;
+	
+	delete pSeekBehavior;
+	delete pWanderBehavior;
+	delete pFleeBehavior;
+	delete pArriveBehavior;
+	delete pEvadeBehavior;
+	delete pPursuitBehavior;
+	delete pFaceBehavior;
+	
 	Super::BeginDestroy();
-
 }
 
 // Called every frame
@@ -41,7 +65,7 @@ void ALevel_CombinedSteering::Tick(float DeltaTime)
 		ImGui::Text("CONTROLS");
 		ImGui::Indent();
 		ImGui::Text("LMB: place target");
-		ImGui::Text("RMB: move cam.");
+		ImGui::Text("WASD: move cam.");
 		ImGui::Text("Scrollwheel: zoom cam.");
 		ImGui::Unindent();
 	
@@ -85,20 +109,21 @@ void ALevel_CombinedSteering::Tick(float DeltaTime)
 		ImGui::Spacing();
 
 
-		// ImGuiHelpers::ImGuiSliderFloatWithSetter("Seek",
-		// 	pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight, 0.f, 1.f,
-		// 	[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight = InVal; }, "%.2f");
-		//
-		// ImGuiHelpers::ImGuiSliderFloatWithSetter("Wander",
-		// pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight, 0.f, 1.f,
-		// [this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight = InVal; }, "%.2f");
+		ImGuiHelpers::ImGuiSliderFloatWithSetter("Seek",
+			pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight, 0.f, 1.f,
+			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight = InVal; }, "%.2f");
+		
+		ImGuiHelpers::ImGuiSliderFloatWithSetter("Wander",
+		pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight, 0.f, 1.f,
+		[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight = InVal; }, "%.2f");
 	
 		//End
 		ImGui::End();
 	}
 #pragma endregion
-	
 	// Combined Steering Update
  // TODO: implement handling mouse click input for seek
  // TODO: implement Make sure to also evade the wanderer
+	
+	pBlendedSteering->SetTarget(MouseTarget);
 }
