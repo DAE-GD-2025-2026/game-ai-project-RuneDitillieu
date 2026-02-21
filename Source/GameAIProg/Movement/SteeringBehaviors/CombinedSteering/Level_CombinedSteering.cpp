@@ -16,33 +16,25 @@ void ALevel_CombinedSteering::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//Create BlendedSteering
-	std::vector<BlendedSteering::WeightedBehavior> WeightedBehaviors{};
-	//WeightedBehaviors.reserve(7);
-	WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pSeekBehavior, 0.5f));
-	WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pWanderBehavior, 0.5f));
-	// WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pFleeBehavior, 0.f));
-	// WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pArriveBehavior, 0.f));
-	// WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pEvadeBehavior, 0.f));
-	// WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pPursuitBehavior, 0.f));
-	// WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pFaceBehavior, 0.f));
-	pBlendedSteering = new BlendedSteering(std::move(WeightedBehaviors));
+	pBlendedSteering = new BlendedSteering({BlendedSteering::WeightedBehavior(pSeekBehavior, 0.5f),
+		BlendedSteering::WeightedBehavior(pWanderBehavior, 0.5f)});
 	
-	pSteeringAgent = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, FVector{0,0,90}, FRotator::ZeroRotator);
-	pSteeringAgent->SetSteeringBehavior(pBlendedSteering);
+	pPrioritySteering = new PrioritySteering({pEvadeBehavior, pWanderBehavior});
+	
+	pSteeringAgentBlended = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, FVector{0,0,90}, FRotator::ZeroRotator);
+	pSteeringAgentBlended->SetSteeringBehavior(pBlendedSteering);
+	pSteeringAgentPriority = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, FVector{0,0,90}, FRotator::ZeroRotator);
+	pSteeringAgentPriority->SetSteeringBehavior(pPrioritySteering);
 }
 
 void ALevel_CombinedSteering::BeginDestroy()
 {
 	delete pBlendedSteering;
+	delete pPrioritySteering;
 	
 	delete pSeekBehavior;
 	delete pWanderBehavior;
-	delete pFleeBehavior;
-	delete pArriveBehavior;
 	delete pEvadeBehavior;
-	delete pPursuitBehavior;
-	delete pFaceBehavior;
 	
 	Super::BeginDestroy();
 }
@@ -125,5 +117,12 @@ void ALevel_CombinedSteering::Tick(float DeltaTime)
  // TODO: implement handling mouse click input for seek
  // TODO: implement Make sure to also evade the wanderer
 	
-	pBlendedSteering->SetTarget(MouseTarget);
+	pSeekBehavior->SetTarget(MouseTarget);
+	
+	FTargetData Target;
+	Target.Position = pSteeringAgentBlended->GetPosition();
+	Target.Orientation = pSteeringAgentBlended->GetRotation();
+	Target.LinearVelocity = pSteeringAgentBlended->GetLinearVelocity();
+	Target.AngularVelocity = pSteeringAgentBlended->GetAngularVelocity();
+	pEvadeBehavior->SetTarget(Target);
 }

@@ -165,6 +165,12 @@ SteeringOutput Evade::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 		DrawTopDownDebugCircle(Agent, FVector(PredictedPosition.X, PredictedPosition.Y, 1), 10, FColor(255, 255, 0, 255));
 	}
 	
+	if (DistToTarget > m_EvadeRadius)
+	{
+		Steering.IsValid = false;
+	}
+	
+	DrawTopDownDebugCircle(Agent, FVector(Agent.GetPosition().X, Agent.GetPosition().Y, 1), m_EvadeRadius, FColor(0, 0, 0, 1));
 	return Steering;
 }
 

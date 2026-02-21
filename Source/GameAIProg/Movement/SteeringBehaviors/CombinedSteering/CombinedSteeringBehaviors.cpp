@@ -12,7 +12,6 @@ BlendedSteering::BlendedSteering(const std::vector<WeightedBehavior>& WeightedBe
 SteeringOutput BlendedSteering::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
 	SteeringOutput BlendedSteering = {};
-	// TODO: Calculate the weighted average steeringbehavior
 	for (WeightedBehavior wb : WeightedBehaviors)
 	{
 		if (wb.Weight >= 0.01f)
@@ -25,7 +24,6 @@ SteeringOutput BlendedSteering::CalculateSteering(float DeltaT, ASteeringAgent& 
 	BlendedSteering.LinearVelocity.Normalize();
 	BlendedSteering.AngularVelocity /= abs(BlendedSteering.AngularVelocity);
 	
-	// TODO: Add debug drawing
 	if (Agent.GetDebugRenderingEnabled())
 	{
 		// Velocity
@@ -45,14 +43,6 @@ SteeringOutput BlendedSteering::CalculateSteering(float DeltaT, ASteeringAgent& 
 	}
 	
 	return BlendedSteering;
-}
-
-void BlendedSteering::SetTarget(const FTargetData& NewTarget)
-{
-	for (WeightedBehavior wb : WeightedBehaviors)
-	{
-		wb.pBehavior->SetTarget(NewTarget);
-	}
 }
 
 float* BlendedSteering::GetWeight(ISteeringBehavior* const SteeringBehavior)
@@ -85,6 +75,6 @@ SteeringOutput PrioritySteering::CalculateSteering(float DeltaT, ASteeringAgent&
 			break;
 	}
 
-	//If non of the behavior return a valid output, last behavior is returned
+	//If none of the behavior return a valid output, last behavior is returned
 	return Steering;
 }

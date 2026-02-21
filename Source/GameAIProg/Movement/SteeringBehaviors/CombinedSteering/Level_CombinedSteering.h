@@ -36,11 +36,9 @@ private:
 	//Behaviors
 	ISteeringBehavior* pSeekBehavior{ new Seek() };
 	ISteeringBehavior* pWanderBehavior{ new Wander() };
-	ISteeringBehavior* pFleeBehavior{ new Flee() };
-	ISteeringBehavior* pArriveBehavior{ new Arrive() };
 	ISteeringBehavior* pEvadeBehavior{ new Evade() };
-	ISteeringBehavior* pPursuitBehavior{ new Pursuit() };
-	ISteeringBehavior* pFaceBehavior{ new Face() };
 	BlendedSteering* pBlendedSteering{ nullptr };
-	ASteeringAgent* pSteeringAgent{ nullptr };
+	PrioritySteering* pPrioritySteering{ nullptr };
+	ASteeringAgent* pSteeringAgentBlended{ nullptr };
+	ASteeringAgent* pSteeringAgentPriority{ nullptr };
 };
