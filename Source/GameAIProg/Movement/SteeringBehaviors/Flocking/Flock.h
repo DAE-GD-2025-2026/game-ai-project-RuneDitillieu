@@ -9,6 +9,7 @@
 #include "Movement/SteeringBehaviors/CombinedSteering/CombinedSteeringBehaviors.h"
 #include <memory>
 #include "imgui.h"
+#include "Movement/SteeringBehaviors/CombinedSteering/CombinedSteeringBehaviors.h"
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
 #include "../SpacePartitioning/SpacePartitioning.h"
 #endif
@@ -64,14 +65,15 @@ private:
 	ASteeringAgent* pAgentToEvade{nullptr};
 	
 	//Steering Behaviors
-	//std::unique_ptr<Separation> pSeparationBehavior{};
-	//std::unique_ptr<Cohesion> pCohesionBehavior{};
-	//std::unique_ptr<VelocityMatch> pVelMatchBehavior{};
-	//std::unique_ptr<Seek> pSeekBehavior{};
-	//std::unique_ptr<Wander> pWanderBehavior{};
-	//std::unique_ptr<Evade> pEvadeBehavior{};
+	std::unique_ptr<Separation> pSeparationBehavior{ std::make_unique<Separation>(this) };
+	std::unique_ptr<Cohesion> pCohesionBehavior{ std::make_unique<Cohesion>(this) };
+	std::unique_ptr<VelocityMatch> pVelMatchBehavior{ std::make_unique<VelocityMatch>(this) };
+	std::unique_ptr<Seek> pSeekBehavior{ std::make_unique<Seek>() };
+	std::unique_ptr<Wander> pWanderBehavior{ std::make_unique<Wander>() };
+	std::unique_ptr<Evade> pEvadeBehavior{ std::make_unique<Evade>() };
 	
 	std::unique_ptr<BlendedSteering> pBlendedSteering{};
+	
 	std::unique_ptr<PrioritySteering> pPrioritySteering{};
 
 	// UI and rendering

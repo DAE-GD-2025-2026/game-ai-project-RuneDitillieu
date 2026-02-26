@@ -114,8 +114,6 @@ void ALevel_CombinedSteering::Tick(float DeltaTime)
 	}
 #pragma endregion
 	// Combined Steering Update
- // TODO: implement handling mouse click input for seek
- // TODO: implement Make sure to also evade the wanderer
 	
 	pSeekBehavior->SetTarget(MouseTarget);
 	
