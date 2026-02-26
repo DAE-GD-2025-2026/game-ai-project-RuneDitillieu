@@ -17,11 +17,11 @@ Flock::Flock(
 {
 	std::vector<BlendedSteering::WeightedBehavior> WeightedBehaviors;
 	WeightedBehaviors.reserve(5);
-	WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pSeparationBehavior.get(), 0.1f));
-	//WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pCohesionBehavior.get(), 0.2f));
-	//WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pVelMatchBehavior.get(), 0.2f));
-	WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pSeekBehavior.get(), 0.3f));
-	//WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pWanderBehavior.get(), 0.2f));
+	WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pSeparationBehavior.get(), 0.35f));
+	WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pCohesionBehavior.get(), 0.05f));
+	WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pVelMatchBehavior.get(), 0.1f));
+	WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pSeekBehavior.get(), 0.4f));
+	WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pWanderBehavior.get(), 0.1f));
 	
 	pBlendedSteering = std::make_unique<BlendedSteering>(WeightedBehaviors);
 	
@@ -33,9 +33,10 @@ Flock::Flock(
 		ASteeringAgent* Agent{ nullptr };
 		bool AgentSuccessfullySpawned{ false };
 		
+		constexpr int SpawnRadius{ 1000 };
 		while (!AgentSuccessfullySpawned)
 		{
-			FVector2D RandPos{ double(rand() % 1000 - 500), double(rand() % 1000 - 500) };
+			FVector2D RandPos{ double((rand() % SpawnRadius) - (SpawnRadius / 2)), double((rand() % SpawnRadius) - (SpawnRadius / 2)) };
 			if (Agent = pWorld->SpawnActor<ASteeringAgent>(AgentClass, FVector{RandPos.X, RandPos.Y,90}, FRotator::ZeroRotator))
 				AgentSuccessfullySpawned = true;
 		}
@@ -56,12 +57,15 @@ void Flock::Tick(float DeltaTime)
 {
  // TODO: trim the agent to the world
 	
-	FTargetData Target;
-	Target.Position = pAgentToEvade->GetPosition();
-	Target.Orientation = pAgentToEvade->GetRotation();
-	Target.LinearVelocity = pAgentToEvade->GetLinearVelocity();
-	Target.AngularVelocity = pAgentToEvade->GetAngularVelocity();
-	pEvadeBehavior->SetTarget(Target);
+	if (pAgentToEvade)
+	{
+		FTargetData Target;
+		Target.Position = pAgentToEvade->GetPosition();
+		Target.Orientation = pAgentToEvade->GetRotation();
+		Target.LinearVelocity = pAgentToEvade->GetLinearVelocity();
+		Target.AngularVelocity = pAgentToEvade->GetAngularVelocity();
+		pEvadeBehavior->SetTarget(Target);
+	}
 	
 	for (ASteeringAgent* Agent : Agents )
 	{
@@ -219,7 +223,9 @@ FVector2D Flock::GetAverageNeighborVelocity() const
 			break;
 	}
 	
-	avgVelocity.Normalize();
+	if (index > 0)
+		avgVelocity.Normalize();
+	
 	return avgVelocity;
 }
 

@@ -19,8 +19,8 @@ void ALevel_Flocking::BeginPlay()
 	TrimWorld->SetTrimWorldSize(3000.f);
 	TrimWorld->bShouldTrimWorld = true;
 
-	pAgentToEvade = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, FVector{0, 0,90}, FRotator::ZeroRotator);
-	pAgentToEvade->SetSteeringBehavior(pWanderBehavior.get());
+	//pAgentToEvade = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, FVector{0, 0,90}, FRotator::ZeroRotator);
+	//pAgentToEvade->SetSteeringBehavior(pWanderBehavior.get());
 	
 	pFlock = TUniquePtr<Flock>(
 		new Flock(
@@ -38,7 +38,7 @@ void ALevel_Flocking::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	TrimWorld->SetTrimWorldSize(1000);
+	TrimWorld->SetTrimWorldSize(1400.f);
 	
 	pFlock->ImGuiRender(WindowPos, WindowSize);
 	pFlock->Tick(DeltaTime);
