@@ -110,6 +110,6 @@ public:
 protected:	
 	float m_OffsetDistance{ 160.f }; // dist to circle center
 	float m_Radius{ 100.f }; // radius of the circle
-	float m_MaxAngleChange{ 15.f / 180.f * PI }; // max allowed diff btwn calcd angles
+	int m_MaxAngleChange{ 15 }; // max allowed diff btwn calcd angles
 	float m_WanderAngle{ 0.f }; // last calculated angle
 };

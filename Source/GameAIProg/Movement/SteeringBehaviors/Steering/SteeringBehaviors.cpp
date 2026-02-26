@@ -178,19 +178,11 @@ SteeringOutput Evade::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 SteeringOutput Wander::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
 	const FVector2D CenterWanderCircle{ Agent.GetPosition() + Agent.GetLinearVelocity().GetSafeNormal() * m_OffsetDistance };
-	float AngleRad{ (rand() % 360) / 180.f * PI };
-	if (abs((AngleRad - m_WanderAngle)) > m_MaxAngleChange)
-	{
-		if (AngleRad > m_WanderAngle) 
-			AngleRad = m_WanderAngle + m_MaxAngleChange;
-		else if (AngleRad < m_WanderAngle)
-			AngleRad = m_WanderAngle - m_MaxAngleChange;
-	}
+	float AngleRad{ ((rand() % (m_MaxAngleChange * 2)) - m_MaxAngleChange) / 180.f * PI };
+	m_WanderAngle += AngleRad;
 	
-	m_WanderAngle = AngleRad;
-	
-	const FVector2D WanderPos{ CenterWanderCircle.X + cos(AngleRad) * m_Radius, 
-						 CenterWanderCircle.Y + sin(AngleRad) * m_Radius };
+	const FVector2D WanderPos{ CenterWanderCircle.X + cos(m_WanderAngle) * m_Radius, 
+						 CenterWanderCircle.Y + sin(m_WanderAngle) * m_Radius };
 	Target.Position = WanderPos;
 	
 	if (Agent.GetDebugRenderingEnabled())
