@@ -10,6 +10,7 @@
 #include <memory>
 #include "imgui.h"
 #include "Movement/SteeringBehaviors/CombinedSteering/CombinedSteeringBehaviors.h"
+#include "Shared/WorldTrimVolume.h"
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
 #include "../SpacePartitioning/SpacePartitioning.h"
 #endif
@@ -19,6 +20,7 @@ class Flock final
 public:
 	Flock(
 	UWorld* pWorld,
+	AWorldTrimVolume* pTrimWorld,
 	TSubclassOf<ASteeringAgent> AgentClass,
 	int FlockSize = 10, 
 	float WorldSize = 100.f, 
@@ -47,7 +49,11 @@ public:
 
 private:
 	// For debug rendering purposes
-	UWorld* pWorld{nullptr};
+	UWorld* pWorld{ nullptr };
+	
+	AWorldTrimVolume* pTrimWorld{ nullptr };
+	float WorldSize;
+	bool ShouldTrimWorld;
 	
 	int FlockSize{0};
 	TArray<ASteeringAgent*> Agents{};
@@ -62,7 +68,7 @@ private:
 	float NeighborhoodRadius{ 300.f };
 	int NrOfNeighbors{0};
 
-	ASteeringAgent* pAgentToEvade{nullptr};
+	ASteeringAgent* pAgentToEvade{ nullptr };
 	
 	//Steering Behaviors
 	std::unique_ptr<Separation> pSeparationBehavior{ std::make_unique<Separation>(this) };
@@ -82,4 +88,5 @@ private:
 	bool DebugRenderPartitions{true};
 
 	void RenderNeighborhood();
+	void RenderSteering(const ASteeringAgent& /*, const SteeringOutput& Steering*/) const;
 };

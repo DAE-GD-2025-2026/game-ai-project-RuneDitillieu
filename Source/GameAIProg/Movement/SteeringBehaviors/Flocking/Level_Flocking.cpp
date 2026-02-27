@@ -25,9 +25,11 @@ void ALevel_Flocking::BeginPlay()
 	pFlock = TUniquePtr<Flock>(
 		new Flock(
 			GetWorld(),
+			TrimWorld,
 			SteeringAgentClass,
 			FlockSize,
-			TrimWorld->GetTrimWorldSize(),
+			// TrimWorld->GetTrimWorldSize(),
+			1400.f,
 			pAgentToEvade,
 			true)
 			);
@@ -37,8 +39,6 @@ void ALevel_Flocking::BeginPlay()
 void ALevel_Flocking::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	TrimWorld->SetTrimWorldSize(1400.f);
 	
 	pFlock->ImGuiRender(WindowPos, WindowSize);
 	pFlock->Tick(DeltaTime);
