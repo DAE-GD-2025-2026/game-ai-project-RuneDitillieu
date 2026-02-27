@@ -163,6 +163,8 @@ SteeringOutput Evade::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 		DrawDebugVectors(Agent, Steering);
 		DrawTopDownDebugCircle(Agent, FVector(Target.Position.X, Target.Position.Y, 1), 10, FColor(255, 0, 0, 255));
 		DrawTopDownDebugCircle(Agent, FVector(PredictedPosition.X, PredictedPosition.Y, 1), 10, FColor(255, 255, 0, 255));
+		
+		DrawTopDownDebugCircle(Agent, FVector(Agent.GetPosition().X, Agent.GetPosition().Y, 1), m_EvadeRadius, FColor(0, 0, 0, 1));
 	}
 	
 	if (DistToTarget > m_EvadeRadius)
@@ -170,7 +172,6 @@ SteeringOutput Evade::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 		Steering.IsValid = false;
 	}
 	
-	DrawTopDownDebugCircle(Agent, FVector(Agent.GetPosition().X, Agent.GetPosition().Y, 1), m_EvadeRadius, FColor(0, 0, 0, 1));
 	return Steering;
 }
 

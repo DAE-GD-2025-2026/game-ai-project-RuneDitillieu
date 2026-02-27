@@ -24,6 +24,7 @@ Flock::Flock(
 	WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pWanderBehavior.get(), 0.1f));
 	
 	pBlendedSteering = std::make_unique<BlendedSteering>(WeightedBehaviors);
+	pPrioritySteering = std::make_unique<PrioritySteering>(PrioritySteering({pEvadeBehavior.get(), pBlendedSteering.get()}));
 	
 	Agents.SetNum(FlockSize);
 	Neighbors.SetNum(FlockSize);
@@ -33,7 +34,7 @@ Flock::Flock(
 		ASteeringAgent* Agent{ nullptr };
 		bool AgentSuccessfullySpawned{ false };
 		
-		constexpr int SpawnRadius{ 1000 };
+		const int SpawnRadius{ FlockSize * 12 };
 		while (!AgentSuccessfullySpawned)
 		{
 			FVector2D RandPos{ double((rand() % SpawnRadius) - (SpawnRadius / 2)), double((rand() % SpawnRadius) - (SpawnRadius / 2)) };
@@ -42,7 +43,7 @@ Flock::Flock(
 		}
 		
 		Agent->SetActorTickEnabled(false);
-		Agent->SetSteeringBehavior(pBlendedSteering.get());
+		Agent->SetSteeringBehavior(pPrioritySteering.get());
 		Agent->SetDebugRenderingEnabled(false);
 		Agents[idx] = Agent;
 	}
@@ -143,7 +144,7 @@ void Flock::RenderNeighborhood()
 	
 	// draw red circle around first agent
 	DrawDebugCircle(pWorld, FVector(Agents[0]->GetPosition().X, Agents[0]->GetPosition().Y, 1), 50, 16, 
-			FColor(255, 0, 0, 255), false, -1, 0, 0,
+			FColor(0, 255, 0, 255), false, -1, 0, 0,
 		FVector(0, 1, 0), FVector(1, 0, 0), false);
 	
 	// draw neighbourhood radius
