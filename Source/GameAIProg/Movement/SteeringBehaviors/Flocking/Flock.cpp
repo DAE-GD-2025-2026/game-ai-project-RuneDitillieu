@@ -1,9 +1,9 @@
 #include "Flock.h"
 #include "FlockingSteeringBehaviors.h"
 #include "Movement/SteeringBehaviors/CombinedSteering/CombinedSteeringBehaviors.h"
+#include "Movement/SteeringBehaviors/SpacePartitioning/SpacePartitioning.h"
 #include "Shared/ImGuiHelpers.h"
 #include "Shared/Level_Base.h"
-
 
 Flock::Flock(
 	UWorld* pWorld,
@@ -20,6 +20,10 @@ Flock::Flock(
 	, FlockSize{FlockSize}
 	, pAgentToEvade{pAgentToEvade}
 {
+#ifdef GAMEAI_USE_SPACE_PARTITIONING
+	pPartitionedSpace = std::make_unique<CellSpace>(CellSpace(pWorld, WorldSize * 2, WorldSize * 2, 14, 14, FlockSize));
+#endif
+	
 	std::vector<BlendedSteering::WeightedBehavior> WeightedBehaviors;
 	WeightedBehaviors.reserve(5);
 	WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pSeparationBehavior.get(), 0.35f));
@@ -32,7 +36,10 @@ Flock::Flock(
 	pPrioritySteering = std::make_unique<PrioritySteering>(PrioritySteering({pEvadeBehavior.get(), pBlendedSteering.get()}));
 	
 	Agents.SetNum(FlockSize);
+#ifndef GAMEAI_USE_SPACE_PARTITIONING
 	Neighbors.SetNum(FlockSize);
+#endif
+	
 	
 	for (int idx{ 0 }; idx < FlockSize; ++idx)
 	{
@@ -51,6 +58,10 @@ Flock::Flock(
 		Agent->SetSteeringBehavior(pPrioritySteering.get());
 		Agent->SetDebugRenderingEnabled(false);
 		Agents[idx] = Agent;
+		
+#ifdef GAMEAI_USE_SPACE_PARTITIONING
+		//pPartitionedSpace->AddAgent(*Agents[idx]);
+#endif
 	}
 }
 
@@ -77,12 +88,14 @@ void Flock::Tick(float DeltaTime)
 	
 	for (ASteeringAgent* Agent : Agents )
 	{
+#ifndef GAMEAI_USE_SPACE_PARTITIONING
 		RegisterNeighbors(Agent);
- 		Agent->Tick(DeltaTime);
+#endif
+		
+ 		//Agent->Tick(DeltaTime);
 	}
 	
-	RenderNeighborhood();
-	RenderDebug();
+	//RenderNeighborhood();
 }
 
 void Flock::RenderDebug()
@@ -94,6 +107,8 @@ void Flock::RenderDebug()
 			RenderSteering(*Agent);
 		}
 	}
+	
+	pPartitionedSpace->RenderCells();
 }
 
 void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
@@ -140,7 +155,12 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 		}
 		ImGui::Spacing();
 		
-		ImGui::Checkbox("Debug Render Individual Agents", &DebugRenderSteering);
+		ImGui::Checkbox("Use SpacePartitioning", &UseSpacePartitioning);
+		ImGui::Spacing();
+		ImGui::Spacing();
+		ImGui::Spacing();
+		
+		ImGui::Checkbox("Debug Render Steering", &DebugRenderSteering);
 		ImGui::Spacing();
 		
 		ImGui::Checkbox("Debug Render Neighborhood", &DebugRenderNeighborhood);
@@ -177,7 +197,10 @@ void Flock::RenderNeighborhood()
 {
 	if (DebugRenderNeighborhood)
 	{
+#ifndef GAMEAI_USE_SPACE_PARTITIONING
 		RegisterNeighbors(Agents[0]);
+#endif
+		
 		size_t index{ 0 };
 	
 		// draw red circle around first agent
@@ -191,7 +214,7 @@ void Flock::RenderNeighborhood()
 			FVector(0, 1, 0), FVector(1, 0, 0), false);
 	
 		// draw yellow circle around registered neighbors
-		for (ASteeringAgent* neighbor : Neighbors)
+		for (ASteeringAgent* neighbor : GetNeighbors())
 		{
 			DrawDebugCircle(pWorld, FVector(neighbor->GetPosition().X, neighbor->GetPosition().Y, 1), 50, 16, 
 				FColor(255, 255, 0, 255), false, -1, 0, 0,
@@ -229,7 +252,7 @@ FVector2D Flock::GetAverageNeighborPos() const
 	FVector2D avgPosition{};
 
 	size_t index{ 0 };
-	for (ASteeringAgent* Neighbor : Neighbors)
+	for (ASteeringAgent* Neighbor : GetNeighbors())
 	{
 		if (Neighbor)
 		{
@@ -254,7 +277,7 @@ FVector2D Flock::GetAverageNeighborVelocity() const
 	FVector2D avgVelocity = FVector2D::ZeroVector;
 
 	size_t index{ 0 };
-	for (ASteeringAgent* neighbor : Neighbors)
+	for (ASteeringAgent* neighbor : GetNeighbors())
 	{
 		avgVelocity += neighbor->GetLinearVelocity();
 		

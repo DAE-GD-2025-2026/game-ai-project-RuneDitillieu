@@ -17,7 +17,6 @@ SteeringOutput Cohesion::CalculateSteering(float deltaT, ASteeringAgent& pAgent)
 //SEPARATION (FLOCKING)
 SteeringOutput Separation::CalculateSteering(float deltaT, ASteeringAgent& pAgent)
 {
-	pFlock->RegisterNeighbors(&pAgent);
 	SteeringOutput Steering{};
 	
 	size_t index{ 0 };
