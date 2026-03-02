@@ -35,13 +35,14 @@ public:
 	void ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize);
 
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
-	const TArray<ASteeringAgent*>& GetNeighbors() const { return pPartitionedSpace->GetNeighbors(); }
-	int GetNrOfNeighbors() const { return pPartitionedSpace->GetNrOfNeighbors(); }
-#else // No space partitioning
+	//const TArray<ASteeringAgent*>& GetNeighbors() const { return pPartitionedSpace->GetNeighbors(); }
+	//int GetNrOfNeighbors() const { return pPartitionedSpace->GetNrOfNeighbors(); }
+//#else // No space partitioning
+#endif
 	void RegisterNeighbors(ASteeringAgent* const Agent);
-	int GetNrOfNeighbors() const { return NrOfNeighbors; }
-	const TArray<ASteeringAgent*>& GetNeighbors() const { return Neighbors; }
-#endif // USE_SPACE_PARTITIONING
+	int GetNrOfNeighbors() const { if (UseSpacePartitioning) return pPartitionedSpace->GetNrOfNeighbors(); return NrOfNeighbors; }
+	const TArray<ASteeringAgent*>& GetNeighbors() const { if (UseSpacePartitioning) return pPartitionedSpace->GetNeighbors(); return Neighbors; }
+//#endif // USE_SPACE_PARTITIONING
 
 	FVector2D GetAverageNeighborPos() const;
 	FVector2D GetAverageNeighborVelocity() const;
@@ -62,9 +63,10 @@ private:
 	std::unique_ptr<CellSpace> pPartitionedSpace{};
 	int NrOfCellsX{ 10 };
 	TArray<FVector2D> OldPositions{};
-#else // No space partitioning
+//#else // No space partitioning
+#endif
 	TArray<ASteeringAgent*> Neighbors{};
-#endif // USE_SPACE_PARTITIONING
+//#endif // USE_SPACE_PARTITIONING
 
 	bool UseSpacePartitioning{ false };
 	float NeighborhoodRadius{ 300.f };

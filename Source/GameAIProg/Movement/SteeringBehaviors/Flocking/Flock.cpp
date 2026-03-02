@@ -22,7 +22,8 @@ Flock::Flock(
 	, pAgentToEvade{pAgentToEvade}
 {
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
-	pPartitionedSpace = std::make_unique<CellSpace>(CellSpace(pWorld, WorldSize * 2, WorldSize * 2, 14, 14, FlockSize));
+	int NumColsRows{ 14 };
+	pPartitionedSpace = std::make_unique<CellSpace>(CellSpace(pWorld, (WorldSize + WorldSize / NumColsRows) * 2, (WorldSize + WorldSize / NumColsRows) * 2, NumColsRows, NumColsRows, FlockSize));
 #endif
 	
 	std::vector<BlendedSteering::WeightedBehavior> WeightedBehaviors;
@@ -37,9 +38,8 @@ Flock::Flock(
 	pPrioritySteering = std::make_unique<PrioritySteering>(PrioritySteering({pEvadeBehavior.get(), pBlendedSteering.get()}));
 	
 	Agents.SetNum(FlockSize);
-#ifndef GAMEAI_USE_SPACE_PARTITIONING
+	OldPositions.SetNum(FlockSize);
 	Neighbors.SetNum(FlockSize);
-#endif
 	
 	
 	for (int idx{ 0 }; idx < FlockSize; ++idx)
@@ -47,7 +47,7 @@ Flock::Flock(
 		ASteeringAgent* Agent{ nullptr };
 		bool AgentSuccessfullySpawned{ false };
 		
-		const int SpawnRadius{ FlockSize * 12 };
+		const int SpawnRadius{ std::clamp((FlockSize * 12), 200, int(WorldSize)) };
 		while (!AgentSuccessfullySpawned)
 		{
 			FVector2D RandPos{ double((rand() % SpawnRadius) - (SpawnRadius / 2)), double((rand() % SpawnRadius) - (SpawnRadius / 2)) };
@@ -59,6 +59,7 @@ Flock::Flock(
 		Agent->SetSteeringBehavior(pPrioritySteering.get());
 		Agent->SetDebugRenderingEnabled(false);
 		Agents[idx] = Agent;
+		OldPositions[idx] = Agent->GetPosition();
 		
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
 		pPartitionedSpace->AddAgent(*Agent);
@@ -87,13 +88,14 @@ void Flock::Tick(float DeltaTime)
 		pEvadeBehavior->SetTarget(Target);
 	}
 	
+	size_t Index{ 0 };
 	for (ASteeringAgent* Agent : Agents )
 	{
-#ifndef GAMEAI_USE_SPACE_PARTITIONING
 		RegisterNeighbors(Agent);
-#endif
-		
- 		//Agent->Tick(DeltaTime);
+ 		Agent->Tick(DeltaTime);
+		pPartitionedSpace->UpdateAgentCell(*Agent, OldPositions[Index]);
+		OldPositions[Index] = Agent->GetPosition();
+		++Index;
 	}
 }
 
@@ -200,7 +202,7 @@ void Flock::RenderNeighborhood()
 	{
 		if (!UseSpacePartitioning)
 		{
-			//RegisterNeighbors(Agents[0]);
+			RegisterNeighbors(Agents[0]);
 		}
 		else
 		{
@@ -236,25 +238,31 @@ void Flock::RenderNeighborhood()
 	}
 }
 
-#ifndef GAMEAI_USE_SPACE_PARTITIONING
+//#ifndef GAMEAI_USE_SPACE_PARTITIONING
 void Flock::RegisterNeighbors(ASteeringAgent* const pAgent)
 {
-	NrOfNeighbors = 0;
-	
-	for (ASteeringAgent* const PossibleNeighbor : Agents)
+	if (UseSpacePartitioning)
 	{
-		if (PossibleNeighbor != pAgent)
+		pPartitionedSpace->RegisterNeighbors(*pAgent, NeighborhoodRadius);
+	}
+	else
+	{
+		NrOfNeighbors = 0;
+		for (ASteeringAgent* const PossibleNeighbor : Agents)
 		{
-			FVector2D VecToAgent = PossibleNeighbor->GetPosition() - pAgent->GetPosition();
-			if (VecToAgent.Length() <= NeighborhoodRadius)
+			if (PossibleNeighbor != pAgent)
 			{
-				Neighbors[NrOfNeighbors] = PossibleNeighbor;
-				++NrOfNeighbors;
+				FVector2D VecToAgent = PossibleNeighbor->GetPosition() - pAgent->GetPosition();
+				if (VecToAgent.Length() <= NeighborhoodRadius)
+				{
+					Neighbors[NrOfNeighbors] = PossibleNeighbor;
+					++NrOfNeighbors;
+				}
 			}
 		}
 	}
 }
-#endif
+//#endif
 
 FVector2D Flock::GetAverageNeighborPos() const
 {
