@@ -74,6 +74,7 @@ void CellSpace::UpdateAgentCell(ASteeringAgent& Agent, const FVector2D& OldPos)
 
 void CellSpace::RegisterNeighbors(ASteeringAgent& Agent, float QueryRadius)
 {
+	// create boundingbox rect
 	FRect NeighborhoodRect{ FVector2D(Agent.GetPosition().X - QueryRadius, Agent.GetPosition().Y - QueryRadius),
 	FVector2D(Agent.GetPosition().X + QueryRadius, Agent.GetPosition().Y + QueryRadius) };
 	
@@ -83,6 +84,7 @@ void CellSpace::RegisterNeighbors(ASteeringAgent& Agent, float QueryRadius)
 	{
 		if (DoRectsOverlap(Cell.BoundingBox,NeighborhoodRect))
 		{
+			// check for neighbors only in cells within boundingbox
 			for (ASteeringAgent* const PossibleNeighbor : Cell.Agents)
 			{
 				if (PossibleNeighbor != &Agent)
@@ -123,7 +125,7 @@ int CellSpace::PositionToIndex(FVector2D const & Pos) const
 {
 	const int Col{ static_cast<int>((Pos.X + SpaceWidth / 2) / CellWidth) };
 	const int Row{ static_cast<int>((Pos.Y + SpaceHeight / 2) / CellHeight) };
-	return int((Row * NrOfCols) + Col);
+	return Row * NrOfCols + Col;
 }
 
 bool CellSpace::DoRectsOverlap(FRect const & RectA, FRect const & RectB)
