@@ -34,11 +34,11 @@ private:
 	bool CanDebugRender = false;
 
 	//Behaviors
-	ISteeringBehavior* pSeekBehavior{ new Seek() };
-	ISteeringBehavior* pWanderBehavior{ new Wander() };
-	ISteeringBehavior* pEvadeBehavior{ new Evade() };
-	BlendedSteering* pBlendedSteering{ nullptr };
-	PrioritySteering* pPrioritySteering{ nullptr };
+	std::unique_ptr<Seek> pSeekBehavior{ std::make_unique<Seek>() };
+	std::unique_ptr<Wander> pWanderBehavior{ std::make_unique<Wander>() };
+	std::unique_ptr<Evade> pEvadeBehavior{ std::make_unique<Evade>() };
+	std::unique_ptr<BlendedSteering> pBlendedSteering{ nullptr };
+	std::unique_ptr<PrioritySteering> pPrioritySteering{ nullptr };
 	ASteeringAgent* pSteeringAgentBlended{ nullptr };
 	ASteeringAgent* pSteeringAgentPriority{ nullptr };
 };

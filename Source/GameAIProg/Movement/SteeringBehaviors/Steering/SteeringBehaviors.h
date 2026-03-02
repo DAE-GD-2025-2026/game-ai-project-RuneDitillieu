@@ -55,7 +55,7 @@ public:
 	
 	//steering
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
-	void SetTargetRadius(float radius) { m_TargetRadius = radius; }
+	void SetTargetRadius(float Radius) { m_TargetRadius = Radius; }
 	
 protected:
 	float m_OriginalMaxLinearSpeed{};
@@ -105,9 +105,9 @@ public:
 	//steering
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
 	
-	void SetWanderOffset(float offset) { m_OffsetDistance = offset; };
-	void SetWanderRadius(float radius) { m_Radius = radius; };
-	void SetMaxAngleChange(float rad) { m_MaxAngleChange = rad; };
+	void SetWanderOffset(float Offset) { m_OffsetDistance = Offset; };
+	void SetWanderRadius(float Radius) { m_Radius = Radius; };
+	void SetMaxAngleChange(float Rad) { m_MaxAngleChange = Rad; };
 	
 protected:	
 	float m_OffsetDistance{ 160.f }; // dist to circle center

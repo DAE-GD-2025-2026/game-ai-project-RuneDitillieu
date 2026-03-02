@@ -6,37 +6,37 @@
 
 //*******************
 //COHESION (FLOCKING)
-SteeringOutput Cohesion::CalculateSteering(float deltaT, ASteeringAgent& pAgent)
+SteeringOutput Cohesion::CalculateSteering(float DeltaT, ASteeringAgent& pAgent)
 {
 	Target.Position = pFlock->GetAverageNeighborPos();
 	
-	return Seek::CalculateSteering(deltaT, pAgent);
+	return Seek::CalculateSteering(DeltaT, pAgent);
 }
 
 //*********************
 //SEPARATION (FLOCKING)
-SteeringOutput Separation::CalculateSteering(float deltaT, ASteeringAgent& pAgent)
+SteeringOutput Separation::CalculateSteering(float DeltaT, ASteeringAgent& pAgent)
 {
 	SteeringOutput Steering{};
 	
-	size_t index{ 0 };
-	for (ASteeringAgent* neighbor : pFlock->GetNeighbors())
+	size_t Index{ 0 };
+	for (const ASteeringAgent* Neighbor : pFlock->GetNeighbors())
 	{
-		FVector2D neighborPos{neighbor->GetPosition() };
-		FVector2D agentPos{ pAgent.GetPosition() };
-		const float DistToNeighbor{ float((neighborPos - agentPos).Length()) };
+		FVector2D NeighborPos{ Neighbor->GetPosition() };
+		FVector2D AgentPos{ pAgent.GetPosition() };
+		const float DistToNeighbor{ static_cast<float>((NeighborPos - AgentPos).Length()) };
 		const float Impact{ 1.f / DistToNeighbor };
 		
-		Target.Position = neighbor->GetPosition();
+		Target.Position = Neighbor->GetPosition();
 		
-		Steering.LinearVelocity += Flee::CalculateSteering(deltaT, pAgent).LinearVelocity * Impact;
+		Steering.LinearVelocity += Flee::CalculateSteering(DeltaT, pAgent).LinearVelocity * Impact;
 		
-		++index;
-		if (index >= pFlock->GetNrOfNeighbors())
+		++Index;
+		if (Index >= pFlock->GetNrOfNeighbors())
 			break;
 	}
 	
-	if (index > 0)
+	if (Index > 0)
 		Steering.LinearVelocity.Normalize();
 
 	return Steering;
@@ -44,7 +44,7 @@ SteeringOutput Separation::CalculateSteering(float deltaT, ASteeringAgent& pAgen
 
 //*************************
 //VELOCITY MATCH (FLOCKING)
-SteeringOutput VelocityMatch::CalculateSteering(float deltaT, ASteeringAgent& pAgent)
+SteeringOutput VelocityMatch::CalculateSteering(float DeltaT, ASteeringAgent& pAgent)
 {
 	SteeringOutput Steering{};
 	Steering.LinearVelocity = pFlock->GetAverageNeighborVelocity();

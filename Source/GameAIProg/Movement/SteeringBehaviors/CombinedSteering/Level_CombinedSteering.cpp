@@ -16,26 +16,19 @@ void ALevel_CombinedSteering::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	pBlendedSteering = new BlendedSteering({BlendedSteering::WeightedBehavior(pSeekBehavior, 0.5f),
-		BlendedSteering::WeightedBehavior(pWanderBehavior, 0.5f)});
+	pBlendedSteering = std::make_unique<BlendedSteering>(BlendedSteering({BlendedSteering::WeightedBehavior(pSeekBehavior.get(), 0.5f),
+		BlendedSteering::WeightedBehavior(pWanderBehavior.get(), 0.5f)}));
 	
-	pPrioritySteering = new PrioritySteering({pEvadeBehavior, pWanderBehavior});
+	pPrioritySteering = std::make_unique<PrioritySteering>(PrioritySteering({pEvadeBehavior.get(), pWanderBehavior.get()}));
 	
 	pSteeringAgentBlended = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, FVector{0,0,90}, FRotator::ZeroRotator);
-	pSteeringAgentBlended->SetSteeringBehavior(pBlendedSteering);
+	pSteeringAgentBlended->SetSteeringBehavior(pBlendedSteering.get());
 	pSteeringAgentPriority = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, FVector{0,0,90}, FRotator::ZeroRotator);
-	pSteeringAgentPriority->SetSteeringBehavior(pPrioritySteering);
+	pSteeringAgentPriority->SetSteeringBehavior(pPrioritySteering.get());
 }
 
 void ALevel_CombinedSteering::BeginDestroy()
 {
-	delete pBlendedSteering;
-	delete pPrioritySteering;
-	
-	delete pSeekBehavior;
-	delete pWanderBehavior;
-	delete pEvadeBehavior;
-	
 	Super::BeginDestroy();
 }
 

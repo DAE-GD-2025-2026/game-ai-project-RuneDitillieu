@@ -11,17 +11,17 @@ Cell::Cell(float Left, float Bottom, float Width, float Height)
 
 std::vector<FVector2D> Cell::GetRectPoints() const
 {
-	const float left = BoundingBox.Min.X;
-	const float bottom = BoundingBox.Min.Y;
-	const float width = BoundingBox.Max.X - BoundingBox.Min.X;
-	const float height = BoundingBox.Max.Y - BoundingBox.Min.Y;
+	const float Left = BoundingBox.Min.X;
+	const float Bottom = BoundingBox.Min.Y;
+	const float Width = BoundingBox.Max.X - BoundingBox.Min.X;
+	const float Height = BoundingBox.Max.Y - BoundingBox.Min.Y;
 
 	std::vector<FVector2D> rectPoints =
 	{
-		{ left , bottom  },
-		{ left , bottom + height  },
-		{ left + width , bottom + height },
-		{ left + width , bottom  },
+		{ Left , Bottom  },
+		{ Left , Bottom + Height  },
+		{ Left + Width , Bottom + Height },
+		{ Left + Width , Bottom  },
 	};
 
 	return rectPoints;
@@ -56,7 +56,7 @@ CellSpace::CellSpace(UWorld* pWorld, float Width, float Height, int Rows, int Co
 
 void CellSpace::AddAgent(ASteeringAgent& Agent)
 {
-	int CellIndex{ PositionToIndex(Agent.GetPosition()) };
+	const int CellIndex{ PositionToIndex(Agent.GetPosition()) };
 	Cells[CellIndex].Agents.push_back(&Agent);
 }
 
@@ -75,7 +75,7 @@ void CellSpace::UpdateAgentCell(ASteeringAgent& Agent, const FVector2D& OldPos)
 void CellSpace::RegisterNeighbors(ASteeringAgent& Agent, float QueryRadius)
 {
 	// create boundingbox rect
-	FRect NeighborhoodRect{ FVector2D(Agent.GetPosition().X - QueryRadius, Agent.GetPosition().Y - QueryRadius),
+	const FRect NeighborhoodRect{ FVector2D(Agent.GetPosition().X - QueryRadius, Agent.GetPosition().Y - QueryRadius),
 	FVector2D(Agent.GetPosition().X + QueryRadius, Agent.GetPosition().Y + QueryRadius) };
 	
 	NrOfNeighbors = 0;
@@ -89,7 +89,7 @@ void CellSpace::RegisterNeighbors(ASteeringAgent& Agent, float QueryRadius)
 			{
 				if (PossibleNeighbor != &Agent)
 				{
-					FVector2D VecToAgent = PossibleNeighbor->GetPosition() - Agent.GetPosition();
+					const FVector2D VecToAgent = PossibleNeighbor->GetPosition() - Agent.GetPosition();
 					if (VecToAgent.Length() <= QueryRadius)
 					{
 						Neighbors[NrOfNeighbors] = PossibleNeighbor;

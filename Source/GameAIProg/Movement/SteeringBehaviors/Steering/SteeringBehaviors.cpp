@@ -87,10 +87,13 @@ SteeringOutput Arrive::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	if (Agent.GetDebugRenderingEnabled())
 	{
 		DrawDebugVectors(Agent, Steering);
+		// slow radius
 		Debug::DrawTopDownDebugCircle(Agent.GetWorld(), FVector(Agent.GetPosition().X, Agent.GetPosition().Y, 1), SlowRadius, 
 			FColor( 0, 0, 255, 255));
+		// target radius
 		Debug::DrawTopDownDebugCircle(Agent.GetWorld(), FVector(Agent.GetPosition().X, Agent.GetPosition().Y, 1), m_TargetRadius, 
 			FColor( 255, 180, 0, 255));
+		// target
 		Debug::DrawTopDownDebugCircle(Agent.GetWorld(), FVector(Target.Position.X, Target.Position.Y, 1), 10, 
 			FColor(255, 0, 0, 255));
 	}
@@ -161,10 +164,13 @@ SteeringOutput Evade::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	if (Agent.GetDebugRenderingEnabled())
 	{
 		DrawDebugVectors(Agent, Steering);
+		// target
 		Debug::DrawTopDownDebugCircle(Agent.GetWorld(), FVector(Target.Position.X, Target.Position.Y, 1), 10, 
 			FColor(255, 0, 0, 255));
+		// predicted position
 		Debug::DrawTopDownDebugCircle(Agent.GetWorld(), FVector(PredictedPosition.X, PredictedPosition.Y, 1), 10, 
 			FColor(255, 255, 0, 255));
+		// evade radius
 		Debug::DrawTopDownDebugCircle(Agent.GetWorld(), FVector(Agent.GetPosition().X, Agent.GetPosition().Y, 1), m_EvadeRadius, 
 			FColor(0, 0, 0, 1));
 	}
@@ -181,7 +187,7 @@ SteeringOutput Evade::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 SteeringOutput Wander::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
 	const FVector2D CenterWanderCircle{ Agent.GetPosition() + Agent.GetLinearVelocity().GetSafeNormal() * m_OffsetDistance };
-	float AngleRad{ ((rand() % (m_MaxAngleChange * 2)) - m_MaxAngleChange) / 180.f * PI };
+	const float AngleRad{ ((rand() % (m_MaxAngleChange * 2)) - m_MaxAngleChange) / 180.f * PI };
 	m_WanderAngle += AngleRad;
 	
 	const FVector2D WanderPos{ CenterWanderCircle.X + cos(m_WanderAngle) * m_Radius, 

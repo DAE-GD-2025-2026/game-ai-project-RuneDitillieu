@@ -22,7 +22,7 @@ Flock::Flock(
 	, pAgentToEvade{pAgentToEvade}
 {
 	// init Partitioned Space
-	int NumColsRows{ 14 };
+	constexpr int NumColsRows{ 14 };
 	pPartitionedSpace = std::make_unique<CellSpace>(CellSpace(pWorld, (WorldSize + WorldSize / NumColsRows) * 2, (WorldSize + WorldSize / NumColsRows) * 2, NumColsRows, NumColsRows, FlockSize));
 	
 	// init Steering Behaviors
@@ -43,15 +43,16 @@ Flock::Flock(
 	Neighbors.SetNum(FlockSize);
 	
 	// spawn agents
-	for (int idx{ 0 }; idx < FlockSize; ++idx)
+	for (int Idx{ 0 }; Idx < FlockSize; ++Idx)
 	{
 		ASteeringAgent* Agent{ nullptr };
 		bool AgentSuccessfullySpawned{ false };
 		
-		const int SpawnRadius{ std::clamp((FlockSize * 12), 200, int(WorldSize)) };
+		const int SpawnRadius{ std::clamp(FlockSize * 12, 200, static_cast<int>(WorldSize)) };
 		while (!AgentSuccessfullySpawned)
 		{
-			FVector2D RandPos{ double((rand() % SpawnRadius) - (SpawnRadius / 2)), double((rand() % SpawnRadius) - (SpawnRadius / 2)) };
+			const FVector2D RandPos{ static_cast<double>((rand() % SpawnRadius) - (SpawnRadius / 2)), 
+				static_cast<double>((rand() % SpawnRadius) - (SpawnRadius / 2)) };
 			if (Agent = pWorld->SpawnActor<ASteeringAgent>(AgentClass, FVector{RandPos.X, RandPos.Y,90}, FRotator::ZeroRotator))
 				AgentSuccessfullySpawned = true;
 		}
@@ -60,8 +61,8 @@ Flock::Flock(
 		Agent->SetSteeringBehavior(pPrioritySteering.get());
 		Agent->SetDebugRenderingEnabled(false);
 		
-		Agents[idx] = Agent;
-		OldPositions[idx] = Agent->GetPosition();
+		Agents[Idx] = Agent;
+		OldPositions[Idx] = Agent->GetPosition();
 		pPartitionedSpace->AddAgent(*Agent);
 	}
 }
@@ -105,7 +106,7 @@ void Flock::RenderDebug()
 {
 	if (DebugRenderSteering)
 	{
-		for (ASteeringAgent* Agent : Agents)
+		for (const ASteeringAgent* Agent : Agents)
 		{
 			RenderSteering(*Agent);
 		}
@@ -219,18 +220,18 @@ void Flock::RenderNeighborhood()
 			FColor(0, 0, 0, 255));
 		
 		// draw yellow circle around registered neighbors
-		size_t index{ 0 };
-		for (ASteeringAgent* neighbor : GetNeighbors())
+		size_t Index{ 0 };
+		for (const ASteeringAgent* Neighbor : GetNeighbors())
 		{
-			if (neighbor != NULL)
+			if (Neighbor != nullptr)
 			{
-				DrawDebugCircle(pWorld, FVector(neighbor->GetPosition().X, neighbor->GetPosition().Y, 1), 50, 16, 
+				DrawDebugCircle(pWorld, FVector(Neighbor->GetPosition().X, Neighbor->GetPosition().Y, 1), 50, 16, 
 				FColor(255, 255, 0, 255), false, -1, 0, 0,
 			FVector(0, 1, 0), FVector(1, 0, 0), false);
 			}
 		
-			++index;
-			if (index >= GetNrOfNeighbors())
+			++Index;
+			if (Index >= GetNrOfNeighbors())
 				break;
 		}
 	}
@@ -245,11 +246,11 @@ void Flock::RegisterNeighbors(ASteeringAgent* const pAgent)
 	else
 	{
 		NrOfNeighbors = 0;
-		for (ASteeringAgent* const PossibleNeighbor : Agents)
+		for (ASteeringAgent* PossibleNeighbor : Agents)
 		{
 			if (PossibleNeighbor != pAgent)
 			{
-				FVector2D VecToAgent = PossibleNeighbor->GetPosition() - pAgent->GetPosition();
+				const FVector2D VecToAgent = PossibleNeighbor->GetPosition() - pAgent->GetPosition();
 				if (VecToAgent.Length() <= NeighborhoodRadius)
 				{
 					Neighbors[NrOfNeighbors] = PossibleNeighbor;
@@ -262,47 +263,47 @@ void Flock::RegisterNeighbors(ASteeringAgent* const pAgent)
 
 FVector2D Flock::GetAverageNeighborPos() const
 {
-	FVector2D avgPosition{};
+	FVector2D AvgPosition{};
 
-	size_t index{ 0 };
-	for (ASteeringAgent* Neighbor : GetNeighbors())
+	size_t Index{ 0 };
+	for (const ASteeringAgent* Neighbor : GetNeighbors())
 	{
 		if (Neighbor)
 		{
-			if (index == 0)
-				avgPosition = Neighbor->GetPosition();
+			if (Index == 0)
+				AvgPosition = Neighbor->GetPosition();
 			else
 			{
-				avgPosition += (Neighbor->GetPosition() - avgPosition) / 2.f;
+				AvgPosition += (Neighbor->GetPosition() - AvgPosition) / 2.f;
 			}
 		
-			++index;
-			if (index >= GetNrOfNeighbors())
+			++Index;
+			if (Index >= GetNrOfNeighbors())
 				break;
 		}
 	}
 	
-	return avgPosition;
+	return AvgPosition;
 }
 
 FVector2D Flock::GetAverageNeighborVelocity() const
 {
-	FVector2D avgVelocity = FVector2D::ZeroVector;
+	FVector2D AvgVelocity = FVector2D::ZeroVector;
 
-	size_t index{ 0 };
-	for (ASteeringAgent* neighbor : GetNeighbors())
+	size_t Index{ 0 };
+	for (const ASteeringAgent* Neighbor : GetNeighbors())
 	{
-		avgVelocity += neighbor->GetLinearVelocity();
+		AvgVelocity += Neighbor->GetLinearVelocity();
 		
-		++index;
-		if (index >= GetNrOfNeighbors())
+		++Index;
+		if (Index >= GetNrOfNeighbors())
 			break;
 	}
 	
-	if (index > 0)
-		avgVelocity.Normalize();
+	if (Index > 0)
+		AvgVelocity.Normalize();
 	
-	return avgVelocity;
+	return AvgVelocity;
 }
 
 void Flock::SetTarget_Seek(FSteeringParams const& Target)
