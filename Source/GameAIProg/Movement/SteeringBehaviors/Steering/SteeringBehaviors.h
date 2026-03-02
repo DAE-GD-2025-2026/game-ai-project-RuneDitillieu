@@ -55,10 +55,12 @@ public:
 	
 	//steering
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+	void SetTargetRadius(float radius) { m_TargetRadius = radius; }
 	
 protected:
 	float m_OriginalMaxLinearSpeed{};
 	bool m_OriginalSpeedIsSet{ false };
+	float m_TargetRadius{ 100.f };
 };
 
 class Face : public  ISteeringBehavior

@@ -1,4 +1,5 @@
 #include "SpacePartitioning.h"
+#include "Shared/DebugHelpers.h"
 
 // --- Cell ---
 // ------------
@@ -55,7 +56,8 @@ CellSpace::CellSpace(UWorld* pWorld, float Width, float Height, int Rows, int Co
 
 void CellSpace::AddAgent(ASteeringAgent& Agent)
 {
-	Cells[PositionToIndex(Agent.GetPosition())].Agents.push_back(&Agent);
+	int CellIndex{ PositionToIndex(Agent.GetPosition()) };
+	Cells[CellIndex].Agents.push_back(&Agent);
 }
 
 void CellSpace::UpdateAgentCell(ASteeringAgent& Agent, const FVector2D& OldPos)
@@ -72,8 +74,29 @@ void CellSpace::UpdateAgentCell(ASteeringAgent& Agent, const FVector2D& OldPos)
 
 void CellSpace::RegisterNeighbors(ASteeringAgent& Agent, float QueryRadius)
 {
-	// TODO Register the neighbors for the provided agent
-	// TODO Only check the cells that are within the radius of the neighborhood
+	FRect NeighborhoodRect{ FVector2D(Agent.GetPosition().X - QueryRadius, Agent.GetPosition().Y - QueryRadius),
+	FVector2D(Agent.GetPosition().X + QueryRadius, Agent.GetPosition().Y + QueryRadius) };
+	
+	NrOfNeighbors = 0;
+	
+	for (Cell Cell : Cells)
+	{
+		if (DoRectsOverlap(Cell.BoundingBox,NeighborhoodRect))
+		{
+			for (ASteeringAgent* const PossibleNeighbor : Cell.Agents)
+			{
+				if (PossibleNeighbor != &Agent)
+				{
+					FVector2D VecToAgent = PossibleNeighbor->GetPosition() - Agent.GetPosition();
+					if (VecToAgent.Length() <= QueryRadius)
+					{
+						Neighbors[NrOfNeighbors] = PossibleNeighbor;
+						++NrOfNeighbors;
+					}
+				}
+			}
+		}
+	}
 }
 
 void CellSpace::EmptyCells()
@@ -84,28 +107,22 @@ void CellSpace::EmptyCells()
 
 void CellSpace::RenderCells() const
 {
+	// draw cells
 	for (Cell Cell : Cells)
 	{
-		FVector2D LeftBottom{ Cell.GetRectPoints()[0] };
-		FVector2D LeftTop{ Cell.GetRectPoints()[1] };
-		FVector2D RightTop{ Cell.GetRectPoints()[2] };
-		FVector2D RightBottom{ Cell.GetRectPoints()[3] };
+		FVector2D BottomLeft{ Cell.GetRectPoints()[0] };
+		FVector2D TopLeft{ Cell.GetRectPoints()[1] };
+		FVector2D TopRight{ Cell.GetRectPoints()[2] };
+		FVector2D BottomRight{ Cell.GetRectPoints()[3] };
 		
-		DrawDebugLine(pWorld, FVector(LeftBottom.X, LeftBottom.Y, 1.f), FVector(RightBottom.X, RightBottom.Y, 1.f),
-			FColor(0, 0, 255, 100));
-		DrawDebugLine(pWorld, FVector(LeftTop.X, LeftTop.Y, 1.f), FVector(RightTop.X, RightTop.Y, 1.f),
-			FColor(0, 0, 255, 100));
-		DrawDebugLine(pWorld, FVector(LeftBottom.X, LeftBottom.Y, 1.f), FVector(LeftTop.X, LeftTop.Y, 1.f),
-			FColor(0, 0, 255, 100));
-		DrawDebugLine(pWorld, FVector(RightTop.X, RightTop.Y, 1.f), FVector(RightBottom.X, RightBottom.Y, 1.f),
-			FColor(0, 0, 255, 100));
+		Debug::DrawDebugRect(pWorld, TopLeft, TopRight, BottomLeft, BottomRight, FColor(100, 150, 255, 255));
 	}
 }
 
 int CellSpace::PositionToIndex(FVector2D const & Pos) const
 {
-	const int Col{ static_cast<int>(Pos.X / CellWidth) };
-	const int Row{ static_cast<int>(Pos.Y / CellHeight) };
+	const int Col{ static_cast<int>((Pos.X + SpaceWidth / 2) / CellWidth) };
+	const int Row{ static_cast<int>((Pos.Y + SpaceHeight / 2) / CellHeight) };
 	return int((Row * NrOfCols) + Col);
 }
 

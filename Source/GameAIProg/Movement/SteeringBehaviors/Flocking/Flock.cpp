@@ -4,6 +4,7 @@
 #include "Movement/SteeringBehaviors/SpacePartitioning/SpacePartitioning.h"
 #include "Shared/ImGuiHelpers.h"
 #include "Shared/Level_Base.h"
+#include "Shared/DebugHelpers.h"
 
 Flock::Flock(
 	UWorld* pWorld,
@@ -60,7 +61,7 @@ Flock::Flock(
 		Agents[idx] = Agent;
 		
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
-		//pPartitionedSpace->AddAgent(*Agents[idx]);
+		pPartitionedSpace->AddAgent(*Agent);
 #endif
 	}
 }
@@ -94,8 +95,6 @@ void Flock::Tick(float DeltaTime)
 		
  		//Agent->Tick(DeltaTime);
 	}
-	
-	//RenderNeighborhood();
 }
 
 void Flock::RenderDebug()
@@ -108,7 +107,9 @@ void Flock::RenderDebug()
 		}
 	}
 	
-	pPartitionedSpace->RenderCells();
+	if (UseSpacePartitioning)
+		pPartitionedSpace->RenderCells();
+	RenderNeighborhood();
 }
 
 void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
@@ -197,31 +198,39 @@ void Flock::RenderNeighborhood()
 {
 	if (DebugRenderNeighborhood)
 	{
-#ifndef GAMEAI_USE_SPACE_PARTITIONING
-		RegisterNeighbors(Agents[0]);
-#endif
-		
-		size_t index{ 0 };
+		if (!UseSpacePartitioning)
+		{
+			//RegisterNeighbors(Agents[0]);
+		}
+		else
+		{
+			pPartitionedSpace->RegisterNeighbors(*Agents[0], NeighborhoodRadius);
+			
+			Debug::DrawDebugRect(pWorld, Agents[0]->GetPosition(), 
+				NeighborhoodRadius, NeighborhoodRadius, FColor(255, 255, 0, 255));
+		}
 	
 		// draw red circle around first agent
-		DrawDebugCircle(pWorld, FVector(Agents[0]->GetPosition().X, Agents[0]->GetPosition().Y, 1), 50, 16, 
-				FColor(0, 255, 0, 255), false, -1, 0, 0,
-			FVector(0, 1, 0), FVector(1, 0, 0), false);
+		Debug::DrawTopDownDebugCircle(pWorld, FVector(Agents[0]->GetPosition().X, Agents[0]->GetPosition().Y, 1), 50,
+			FColor(0, 255, 0, 255));
 	
 		// draw neighbourhood radius
-		DrawDebugCircle(pWorld, FVector(Agents[0]->GetPosition().X, Agents[0]->GetPosition().Y, 1), NeighborhoodRadius, 16, 
-				FColor(0, 0, 0, 255), false, -1, 0, 0,
-			FVector(0, 1, 0), FVector(1, 0, 0), false);
-	
+		Debug::DrawTopDownDebugCircle(pWorld, FVector(Agents[0]->GetPosition().X, Agents[0]->GetPosition().Y, 1), NeighborhoodRadius,
+			FColor(0, 0, 0, 255));
+		
 		// draw yellow circle around registered neighbors
+		size_t index{ 0 };
 		for (ASteeringAgent* neighbor : GetNeighbors())
 		{
-			DrawDebugCircle(pWorld, FVector(neighbor->GetPosition().X, neighbor->GetPosition().Y, 1), 50, 16, 
+			if (neighbor != NULL)
+			{
+				DrawDebugCircle(pWorld, FVector(neighbor->GetPosition().X, neighbor->GetPosition().Y, 1), 50, 16, 
 				FColor(255, 255, 0, 255), false, -1, 0, 0,
 			FVector(0, 1, 0), FVector(1, 0, 0), false);
+			}
 		
 			++index;
-			if (index >= NrOfNeighbors)
+			if (index >= GetNrOfNeighbors())
 				break;
 		}
 	}
