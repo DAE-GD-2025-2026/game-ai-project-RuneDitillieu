@@ -21,9 +21,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	bool bUseMouseTarget{true};
+	bool bUseMouseTarget{ true };
 
-	int const FlockSize{100};
+	int const FlockSize{ 100 };
 
 	TUniquePtr<Flock> pFlock{};
 	

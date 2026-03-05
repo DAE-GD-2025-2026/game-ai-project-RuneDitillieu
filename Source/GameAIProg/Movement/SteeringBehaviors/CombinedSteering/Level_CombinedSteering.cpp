@@ -8,7 +8,6 @@ ALevel_CombinedSteering::ALevel_CombinedSteering()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	
 }
 
 // Called when the game starts or when spawned
@@ -16,7 +15,7 @@ void ALevel_CombinedSteering::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	pEvadeBehavior->SetUseEvadeRadius(true);
+	pEvadeBehavior->SetUseEvadeRadius(true);	// for priority steering
 	
 	pBlendedSteering = std::make_unique<BlendedSteering>(BlendedSteering({BlendedSteering::WeightedBehavior(pSeekBehavior.get(), 0.5f),
 		BlendedSteering::WeightedBehavior(pWanderBehavior.get(), 0.5f)}));
@@ -76,9 +75,11 @@ void ALevel_CombinedSteering::Tick(float DeltaTime)
 		ImGui::Spacing();
 		ImGui::Spacing();
 	
+		// checkboxes
 		if (ImGui::Checkbox("Debug Rendering", &CanDebugRender))
 		{
-   // TODO: Handle the debug rendering of your agents here :)
+			pSteeringAgentBlended->SetDebugRenderingEnabled(CanDebugRender);
+			pSteeringAgentPriority->SetDebugRenderingEnabled(CanDebugRender);
 		}
 		ImGui::Checkbox("Trim World", &TrimWorld->bShouldTrimWorld);
 		if (TrimWorld->bShouldTrimWorld)
@@ -92,9 +93,9 @@ void ALevel_CombinedSteering::Tick(float DeltaTime)
 		ImGui::Spacing();
 		ImGui::Spacing();
 	
+		// sliders
 		ImGui::Text("Behavior Weights");
 		ImGui::Spacing();
-
 
 		ImGuiHelpers::ImGuiSliderFloatWithSetter("Seek",
 			pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight, 0.f, 1.f,
@@ -108,8 +109,8 @@ void ALevel_CombinedSteering::Tick(float DeltaTime)
 		ImGui::End();
 	}
 #pragma endregion
-	// Combined Steering Update
 	
+	// Combined Steering Update
 	pSeekBehavior->SetTarget(MouseTarget);
 	
 	FTargetData Target;

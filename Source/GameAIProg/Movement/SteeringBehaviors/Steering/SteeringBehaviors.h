@@ -25,8 +25,8 @@ protected:
 	FTargetData Target;
 };
 
-// Your own SteeringBehaviors should follow here...
 
+// SEEK
 class Seek : public ISteeringBehavior
 {
 public:
@@ -37,6 +37,7 @@ public:
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
 };
 
+// FLEE
 class Flee : public ISteeringBehavior
 {
 public:
@@ -47,6 +48,7 @@ public:
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
 };
 
+// ARRIVE
 class Arrive : public ISteeringBehavior
 {
 public:
@@ -63,6 +65,7 @@ protected:
 	float m_TargetRadius{ 100.f };
 };
 
+// FACE
 class Face : public  ISteeringBehavior
 {
 public:
@@ -73,6 +76,7 @@ public:
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
 };
 
+// PURSUIT
 class Pursuit : public  ISteeringBehavior
 {
 public:
@@ -83,6 +87,7 @@ public:
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
 };
 
+// EVADE
 class Evade : public  ISteeringBehavior
 {
 public:
@@ -98,6 +103,7 @@ private:
 	float m_EvadeRadius{ 250.f };
 };
 
+// WANDER
 class Wander : public  Seek
 {
 public:
@@ -112,8 +118,8 @@ public:
 	void SetMaxAngleChange(float Rad) { m_MaxAngleChange = Rad; };
 	
 protected:	
-	float m_OffsetDistance{ 160.f }; // dist to circle center
-	float m_Radius{ 100.f }; // radius of the circle
-	int m_MaxAngleChange{ 15 }; // max allowed diff btwn calcd angles
-	float m_WanderAngle{ 0.f }; // last calculated angle
+	float m_OffsetDistance{ 160.f };	// distance to circle center in degrees
+	float m_Radius{ 100.f };			// radius of the circle
+	int m_MaxAngleChange{ 15 };			// max allowed difference between calculated angles
+	float m_WanderAngle{ 0.f };			// last calculated angle
 };

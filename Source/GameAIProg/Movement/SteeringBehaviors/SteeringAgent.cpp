@@ -35,7 +35,7 @@ void ASteeringAgent::Tick(float DeltaTime)
 		{
 			AddMovementInput(FVector{output.LinearVelocity, 0.f});
 			
-			if (!IsAutoOrienting())
+			//if (!IsAutoOrienting())
 			{
 				if (AAIController* AIController = Cast<AAIController>(GetController()))
 				{

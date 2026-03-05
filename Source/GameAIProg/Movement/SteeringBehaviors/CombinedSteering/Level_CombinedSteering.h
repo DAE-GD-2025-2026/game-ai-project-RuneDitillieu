@@ -39,6 +39,6 @@ private:
 	std::unique_ptr<Evade> pEvadeBehavior{ std::make_unique<Evade>() };
 	std::unique_ptr<BlendedSteering> pBlendedSteering{ nullptr };
 	std::unique_ptr<PrioritySteering> pPrioritySteering{ nullptr };
-	ASteeringAgent* pSteeringAgentBlended{ nullptr };
-	ASteeringAgent* pSteeringAgentPriority{ nullptr };
+	ASteeringAgent* pSteeringAgentBlended{ nullptr };	// non-owning
+	ASteeringAgent* pSteeringAgentPriority{ nullptr };	// non-owning
 };
