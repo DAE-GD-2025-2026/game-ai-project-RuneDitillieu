@@ -91,8 +91,10 @@ public:
 	
 	//steering
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+	void SetUseEvadeRadius(bool useEvadeRadius) { m_UseEvadeRadius = useEvadeRadius; }
 	
 private:
+	bool m_UseEvadeRadius{ false };
 	float m_EvadeRadius{ 250.f };
 };
 

@@ -41,7 +41,7 @@ SteeringOutput Seek::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 SteeringOutput Flee::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
 	SteeringOutput Steering{};
-	Steering.LinearVelocity = Target.Position + Agent.GetPosition();
+	Steering.LinearVelocity = Agent.GetPosition() - Target.Position;
 	Steering.LinearVelocity.Normalize();
 	
 	if (Agent.GetDebugRenderingEnabled())
@@ -171,11 +171,12 @@ SteeringOutput Evade::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 		Debug::DrawTopDownDebugCircle(Agent.GetWorld(), FVector(PredictedPosition.X, PredictedPosition.Y, 1), 10, 
 			FColor(255, 255, 0, 255));
 		// evade radius
-		Debug::DrawTopDownDebugCircle(Agent.GetWorld(), FVector(Agent.GetPosition().X, Agent.GetPosition().Y, 1), m_EvadeRadius, 
-			FColor(0, 0, 0, 1));
+		if (m_UseEvadeRadius)
+			Debug::DrawTopDownDebugCircle(Agent.GetWorld(), FVector(Agent.GetPosition().X, Agent.GetPosition().Y, 1), m_EvadeRadius, 
+				FColor(0, 0, 0, 1));
 	}
 	
-	if (DistToTarget > m_EvadeRadius)
+	if (m_UseEvadeRadius && DistToTarget > m_EvadeRadius)
 	{
 		Steering.IsValid = false;
 	}

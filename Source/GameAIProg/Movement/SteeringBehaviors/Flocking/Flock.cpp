@@ -25,6 +25,8 @@ Flock::Flock(
 	constexpr int NumColsRows{ 14 };
 	pPartitionedSpace = std::make_unique<CellSpace>(CellSpace(pWorld, (WorldSize + WorldSize / NumColsRows) * 2, (WorldSize + WorldSize / NumColsRows) * 2, NumColsRows, NumColsRows, FlockSize));
 	
+	pEvadeBehavior->SetUseEvadeRadius(true);
+	
 	// init Steering Behaviors
 	std::vector<BlendedSteering::WeightedBehavior> WeightedBehaviors;
 	WeightedBehaviors.reserve(5);

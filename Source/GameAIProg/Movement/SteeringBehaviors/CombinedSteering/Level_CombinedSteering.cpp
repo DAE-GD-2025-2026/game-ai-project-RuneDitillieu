@@ -16,6 +16,8 @@ void ALevel_CombinedSteering::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	pEvadeBehavior->SetUseEvadeRadius(true);
+	
 	pBlendedSteering = std::make_unique<BlendedSteering>(BlendedSteering({BlendedSteering::WeightedBehavior(pSeekBehavior.get(), 0.5f),
 		BlendedSteering::WeightedBehavior(pWanderBehavior.get(), 0.5f)}));
 	
