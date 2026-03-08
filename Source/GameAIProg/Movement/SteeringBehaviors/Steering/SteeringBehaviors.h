@@ -100,7 +100,7 @@ public:
 	
 private:
 	bool m_UseEvadeRadius{ false };
-	float m_EvadeRadius{ 250.f };
+	float m_EvadeRadius{ 300.f };
 };
 
 // WANDER

@@ -1,8 +1,5 @@
 ﻿#pragma once
 
-// Toggle this define to enable/disable spatial partitioning
-#define GAMEAI_USE_SPACE_PARTITIONING
-
 #include "FlockingSteeringBehaviors.h"
 #include "Movement/SteeringBehaviors/SteeringAgent.h"
 #include "Movement/SteeringBehaviors/SteeringHelpers.h"
@@ -10,7 +7,6 @@
 #include <memory>
 #include "imgui.h"
 #include "Shared/WorldTrimVolume.h"
-#include "../SpacePartitioning/SpacePartitioning.h"
 
 class CellSpace;
 class Flock final
@@ -32,8 +28,8 @@ public:
 	void ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize);
 	
 	void RegisterNeighbors(ASteeringAgent* const Agent);
-	int GetNrOfNeighbors() const { if (UseSpacePartitioning) return pPartitionedSpace->GetNrOfNeighbors(); return NrOfNeighbors; }
-	const TArray<ASteeringAgent*>& GetNeighbors() const { if (UseSpacePartitioning) return pPartitionedSpace->GetNeighbors(); return Neighbors; }
+	int GetNrOfNeighbors() const;
+	const TArray<ASteeringAgent*>& GetNeighbors() const;
 
 	FVector2D GetAverageNeighborPos() const;
 	FVector2D GetAverageNeighborVelocity() const;
@@ -48,7 +44,7 @@ private:
 	float WorldSize;
 	bool ShouldTrimWorld;
 	
-	int FlockSize{0};
+	int FlockSize{ 0 };
 	TArray<ASteeringAgent*> Agents{};
 
 	std::unique_ptr<CellSpace> pPartitionedSpace{};
@@ -59,7 +55,7 @@ private:
 
 	bool UseSpacePartitioning{ false };
 	float NeighborhoodRadius{ 300.f };
-	int NrOfNeighbors{0};
+	int NrOfNeighbors{ 0 };
 
 	ASteeringAgent* pAgentToEvade{ nullptr };
 	
@@ -76,10 +72,12 @@ private:
 	std::unique_ptr<PrioritySteering> pPrioritySteering{};
 
 	// UI and rendering
-	bool DebugRenderSteering{false};
-	bool DebugRenderNeighborhood{true};
-	bool DebugRenderPartitions{true};
+	bool DebugRenderSteering{ false };
+	bool DebugRenderNeighborhood{ true };
+	bool DebugRenderPartitions{ true };
+	
+	FVector2D SeekTargetPos{};
 
 	void RenderNeighborhood();
-	void RenderSteering(const ASteeringAgent& /*, const SteeringOutput& Steering*/) const;
+	void RenderSteering(const ASteeringAgent&) const;
 };

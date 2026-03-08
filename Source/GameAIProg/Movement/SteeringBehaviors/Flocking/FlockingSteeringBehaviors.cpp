@@ -22,9 +22,7 @@ SteeringOutput Separation::CalculateSteering(float DeltaT, ASteeringAgent& pAgen
 	size_t Index{ 0 };
 	for (const ASteeringAgent* Neighbor : pFlock->GetNeighbors())
 	{
-		FVector2D NeighborPos{ Neighbor->GetPosition() };
-		FVector2D AgentPos{ pAgent.GetPosition() };
-		const float DistToNeighbor{ static_cast<float>((NeighborPos - AgentPos).Length()) };
+		const float DistToNeighbor{ static_cast<float>((Neighbor->GetPosition() - pAgent.GetPosition()).Length()) };
 		const float Impact{ 1.f / DistToNeighbor };
 		
 		Target.Position = Neighbor->GetPosition();

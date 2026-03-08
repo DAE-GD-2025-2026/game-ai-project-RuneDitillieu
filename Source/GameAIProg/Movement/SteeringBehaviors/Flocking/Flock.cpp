@@ -22,12 +22,14 @@ Flock::Flock(
 	, pAgentToEvade{pAgentToEvade}
 {
 	// init Partitioned Space
-	constexpr int NumColsRows{ 14 };
-	pPartitionedSpace = std::make_unique<CellSpace>(CellSpace(pWorld, (WorldSize + WorldSize / NumColsRows) * 2, (WorldSize + WorldSize / NumColsRows) * 2, NumColsRows, NumColsRows, FlockSize));
+	constexpr int NumColsRows{ 10 };
+	pPartitionedSpace = std::make_unique<CellSpace>(CellSpace(pWorld, (WorldSize + WorldSize / NumColsRows) * 2, (WorldSize + WorldSize / NumColsRows) * 2, 
+		NumColsRows, NumColsRows, FlockSize));
 	
-	pEvadeBehavior->SetUseEvadeRadius(true);
 	
 	// init Steering Behaviors
+	pEvadeBehavior->SetUseEvadeRadius(true);
+	
 	std::vector<BlendedSteering::WeightedBehavior> WeightedBehaviors;
 	WeightedBehaviors.reserve(5);
 	WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pSeparationBehavior.get(), 0.35f));
@@ -37,7 +39,7 @@ Flock::Flock(
 	WeightedBehaviors.push_back(BlendedSteering::WeightedBehavior(pWanderBehavior.get(), 0.1f));
 	
 	pBlendedSteering = std::make_unique<BlendedSteering>(WeightedBehaviors);
-	pPrioritySteering = std::make_unique<PrioritySteering>(PrioritySteering({pEvadeBehavior.get(), pBlendedSteering.get()}));
+	pPrioritySteering = std::make_unique<PrioritySteering>(PrioritySteering({ pEvadeBehavior.get(), pBlendedSteering.get() }));
 	
 	// init arrays
 	Agents.SetNum(FlockSize);
@@ -263,6 +265,20 @@ void Flock::RegisterNeighbors(ASteeringAgent* const pAgent)
 	}
 }
 
+int Flock::GetNrOfNeighbors() const
+{
+	if (UseSpacePartitioning) 
+		return pPartitionedSpace->GetNrOfNeighbors(); 
+	return NrOfNeighbors;
+}
+
+const TArray<ASteeringAgent*>& Flock::GetNeighbors() const
+{
+	if (UseSpacePartitioning) 
+		return pPartitionedSpace->GetNeighbors(); 
+	return Neighbors;
+}
+
 FVector2D Flock::GetAverageNeighborPos() const
 {
 	FVector2D AvgPosition{};
@@ -311,6 +327,7 @@ FVector2D Flock::GetAverageNeighborVelocity() const
 void Flock::SetTarget_Seek(FSteeringParams const& Target)
 {
 	pSeekBehavior->SetTarget(Target);
+	SeekTargetPos = Target.Position;
 }
 
 void Flock::RenderSteering(const ASteeringAgent& Agent/*, const SteeringOutput& Steering*/) const
@@ -319,14 +336,6 @@ void Flock::RenderSteering(const ASteeringAgent& Agent/*, const SteeringOutput& 
 	const FVector2D EndPoint2{Agent.GetPosition() + Agent.GetLinearVelocity() * 0.5f};
 	DrawDebugLine(Agent.GetWorld(), FVector(Agent.GetPosition().X, Agent.GetPosition().Y, 1), 
 		FVector(EndPoint2.X, EndPoint2.Y, 1), FColor(255, 0, 255, 255)); 
-	//
-	// // Desired Direction
-	// const FVector2D EndPoint1{ Agent.GetPosition() + (Steering.LinearVelocity * 300)};
-	// DrawDebugLine(Agent.GetWorld(), FVector(Agent.GetPosition().X, Agent.GetPosition().Y, 1), 
-	// 	FVector(EndPoint1.X, EndPoint1.Y, 1), FColor(0, 255, 0, 255)); 
-	//
-	// // Steering
-	// const FVector2D EndPoint3{ Agent.GetPosition() + (EndPoint1 - EndPoint2)};
-	// DrawDebugLine(Agent.GetWorld(), FVector(Agent.GetPosition().X, Agent.GetPosition().Y, 1), 
-	// 	FVector(EndPoint3.X, EndPoint3.Y, 1), FColor(0, 255, 255, 255));
+	
+	Debug::DrawTarget(pWorld, SeekTargetPos);
 }
