@@ -118,6 +118,7 @@ void CellSpace::RenderCells() const
 		FVector2D BottomRight{ Cell.GetRectPoints()[3] };
 		
 		Debug::DrawDebugRect(pWorld, TopLeft, TopRight, BottomLeft, BottomRight, FColor(100, 150, 255, 255));
+		DrawDebugString(pWorld, FVector(BottomLeft.X + 10, BottomLeft.Y + 10, 1), FString::FromInt(Cell.Agents.size()));
 	}
 }
 
