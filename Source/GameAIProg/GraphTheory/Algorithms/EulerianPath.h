@@ -34,15 +34,38 @@ namespace GameAI
 	inline Eulerianity EulerianPath::IsEulerian() const
 	{
 		// TODO If the graph is not connected, there can be no Eulerian Trail
-
+		if (!IsConnected())
+		{
+			return Eulerianity::notEulerian;
+		}
+		
 		// TODO Count nodes with odd degree 
-
+		int AmountOddNodes{ 0 };
+		std::vector<Node*> Nodes{ m_pGraph->GetActiveNodes() };
+		for (Node* Node : Nodes)
+		{
+			if (m_pGraph->FindConnectionsFrom(Node->GetId()).size() % 2 == 1)
+			{
+				++AmountOddNodes;
+			}
+		}
+		
 		// TODO A connected graph with more than 2 nodes with an odd degree (an odd amount of connections) is not Eulerian
-
+		if (AmountOddNodes > 2)
+			return Eulerianity::notEulerian;
+		
 		// TODO A connected graph with exactly 2 nodes with an odd degree is Semi-Eulerian (unless there are only 2 nodes)
 		// TODO An Euler trail can be made, but only starting and ending in these 2 nodes
-
+		if (AmountOddNodes == 2 && Nodes.size() > 2)
+		{
+			return Eulerianity::semiEulerian;
+		}
+		
 		// TODO A connected graph with no odd nodes is Eulerian
+		if (AmountOddNodes == 0)
+		{
+			return Eulerianity::eulerian;
+		}
 		
 		return Eulerianity::notEulerian;
 	}
@@ -79,7 +102,7 @@ namespace GameAI
 		std::stack<int> nodeStack;
 		std::vector<Connection*> Connections{ graphCopy.FindConnectionsFrom(currentNodeId) };
 		
-		while (nodeStack.size() > 0 && Connections.size() > 0)
+		do
 		{
 			// if there are connections, add cur to stack, remove first connection and put neighbor as cur
 			if (Connections.size() > 0)
@@ -103,7 +126,8 @@ namespace GameAI
 			// get connections of new current node
 			Connections.clear();
 			Connections = graphCopy.FindConnectionsFrom(currentNodeId);
-		}
+		} while (nodeStack.size() > 0 && Connections.size() > 0);
+			
 		Path.push_back(m_pGraph->GetNode(currentNodeId).get());
 
 		std::reverse(Path.begin(), Path.end());
@@ -152,8 +176,7 @@ namespace GameAI
 		// TODO if a node was never visited, this graph is not connected
 		
 		std::vector<bool> IsVisited{};
-		IsVisited.reserve(Nodes.size());
-		for (int idx{ 0 }; idx < IsVisited.capacity(); ++idx)
+		for (size_t idx{ 0 }; idx < Nodes.size(); ++idx)
 		{
 			IsVisited.push_back(false);
 		}
