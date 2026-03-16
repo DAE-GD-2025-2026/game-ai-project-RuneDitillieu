@@ -45,13 +45,29 @@ void ALevel_GraphTheory::BeginPlay()
 	Graph.AddNode(std::make_unique<Node>(FVector2D(0, 0)));
 	Graph.AddNode(std::make_unique<Node>(FVector2D(200, 200)));
 	Graph.AddNode(std::make_unique<Node>(FVector2D(200, 500)));
+	Graph.AddNode(std::make_unique<Node>(FVector2D(-200, 500)));
+	Graph.AddNode(std::make_unique<Node>(FVector2D(-200, 200)));
+	
 	Graph.AddConnection(std::make_unique<Connection>(Graph.GetNodes()[0]->GetId(), Graph.GetNodes()[1]->GetId()));
 	Graph.AddConnection(std::make_unique<Connection>(Graph.GetNodes()[1]->GetId(), Graph.GetNodes()[2]->GetId()));
+	Graph.AddConnection(std::make_unique<Connection>(Graph.GetNodes()[2]->GetId(), Graph.GetNodes()[3]->GetId()));
+	Graph.AddConnection(std::make_unique<Connection>(Graph.GetNodes()[3]->GetId(), Graph.GetNodes()[4]->GetId()));
+	Graph.AddConnection(std::make_unique<Connection>(Graph.GetNodes()[4]->GetId(), Graph.GetNodes()[0]->GetId()));
+	
+	Graph.AddConnection(std::make_unique<Connection>(Graph.GetNodes()[1]->GetId(), Graph.GetNodes()[3]->GetId()));
+	Graph.AddConnection(std::make_unique<Connection>(Graph.GetNodes()[1]->GetId(), Graph.GetNodes()[4]->GetId()));
+	Graph.AddConnection(std::make_unique<Connection>(Graph.GetNodes()[4]->GetId(), Graph.GetNodes()[2]->GetId()));
+	
+
 
 	// Spawn the Agent
 	Agent = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, 
 	FVector{0,0,90}, FRotator::ZeroRotator);
 	Agent->SetSteeringBehavior(&PathFollow);
+	
+	EulerianPath EulerianPath{ &Graph };
+	Eulerianity Eulerianity{ EulerianPath.IsEulerian() };
+	UpdateAgentPath(EulerianPath.FindPath(Eulerianity));
 	
 	Renderer = GraphRenderer(GetWorld());
 }
@@ -111,7 +127,11 @@ void ALevel_GraphTheory::Tick(float DeltaTime)
 	// TODO if a path is found, have the agent follow it
 	EulerianPath EulerianPath{ &Graph };
 	Eulerianity Eulerianity{ EulerianPath.IsEulerian() };
-	UpdateAgentPath(EulerianPath.FindPath(Eulerianity));
+
+	if (PlayerGraphEditor->HasGraphUpdated())
+	{
+		UpdateAgentPath(EulerianPath.FindPath(Eulerianity));
+	}
 }
 
 void ALevel_GraphTheory::UpdateAgentPath(std::vector<Node*> const& Trail)
@@ -129,6 +149,7 @@ void ALevel_GraphTheory::UpdateAgentPath(std::vector<Node*> const& Trail)
 	if (path.size() > 0)
 	{
 		Agent->SetPosition(path[0]);
+
 	}
 }
 

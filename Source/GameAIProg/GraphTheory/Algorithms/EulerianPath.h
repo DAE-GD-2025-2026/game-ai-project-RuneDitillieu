@@ -101,34 +101,72 @@ namespace GameAI
 		// TODO Start algorithm loop
 		std::stack<int> nodeStack;
 		std::vector<Connection*> Connections{ graphCopy.FindConnectionsFrom(currentNodeId) };
-		
+
 		do
 		{
-			// if there are connections, add cur to stack, remove first connection and put neighbor as cur
+			// if node has neighbors
 			if (Connections.size() > 0)
 			{
 				nodeStack.push(currentNodeId);
-				int NeighborNodeId{ Connections[0]->GetToId() };
-				graphCopy.RemoveConnection(currentNodeId, NeighborNodeId);
-				currentNodeId = NeighborNodeId;
+				int neighborId = Connections[0]->GetToId();
+				graphCopy.RemoveConnection(currentNodeId, neighborId);
+				currentNodeId = neighborId;
+				Connections = graphCopy.FindConnectionsFrom(currentNodeId);
 			}
-			// if no connections, pop all nodes without neighbors from the stack and add them to the path
+			// if no more neighbors
 			else
 			{
-				while (nodeStack.size() > 0 && graphCopy.FindConnectionsFrom(nodeStack.top()).size() == 0)
+				nodeStack.push(currentNodeId);
+				while (nodeStack.size() > 0 && Connections.size() == 0)
 				{
-					Path.push_back(m_pGraph->GetNode(nodeStack.top()).get());
+					Path.push_back(m_pGraph->GetNode(currentNodeId).get());
 					nodeStack.pop();
+					
+					if (nodeStack.size() > 0)
+					{
+						currentNodeId = nodeStack.top();
+						Connections = graphCopy.FindConnectionsFrom(currentNodeId);
+					}
 				}
-				currentNodeId = nodeStack.top();
 			}
-			
-			// get connections of new current node
-			Connections.clear();
-			Connections = graphCopy.FindConnectionsFrom(currentNodeId);
-		} while (nodeStack.size() > 0 && Connections.size() > 0);
-			
-		Path.push_back(m_pGraph->GetNode(currentNodeId).get());
+		}
+		while (nodeStack.size() > 0 || Connections.size() > 0);		// until stack is empty and currentNode has no neighbors
+		
+		// do
+		// {
+		// 	if (currentNodeId == -1)
+		// 		break;
+		// 	
+		// 	// get connections of current node
+		// 	Connections.clear();
+		// 	Connections = graphCopy.FindConnectionsFrom(currentNodeId);
+		// 	
+		// 	// if there are connections, add cur to stack, remove first connection and put neighbor as cur
+		// 	if (Connections.size() > 0)
+		// 	{
+		// 		nodeStack.push(currentNodeId);
+		// 		int NeighborNodeId{ Connections[0]->GetToId() };
+		// 		graphCopy.RemoveConnection(currentNodeId, NeighborNodeId);
+		// 		currentNodeId = NeighborNodeId;
+		// 	}
+		// 	// if no connections, pop all nodes without neighbors from the stack and add them to the path
+		// 	else
+		// 	{
+		// 		nodeStack.push(currentNodeId);
+		// 		while (nodeStack.size() > 1 && graphCopy.FindConnectionsFrom(nodeStack.top()).size() == 0)
+		// 		{
+		// 			Path.push_back(m_pGraph->GetNode(nodeStack.top()).get());
+		// 			nodeStack.pop();
+		// 		}
+		// 		if (nodeStack.size() > 0)
+		// 			currentNodeId = nodeStack.top();
+		// 		else
+		// 		 	currentNodeId = -1;
+		// 	}
+		// } while (nodeStack.size() > 0 || Connections.size() > 0);
+		// 	
+		// if (currentNodeId != -1)
+		// 	Path.push_back(m_pGraph->GetNode(nodeStack.top()).get());
 
 		std::reverse(Path.begin(), Path.end());
 		return Path;
