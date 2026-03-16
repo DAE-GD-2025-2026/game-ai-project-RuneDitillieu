@@ -33,13 +33,13 @@ namespace GameAI
 
 	inline Eulerianity EulerianPath::IsEulerian() const
 	{
-		// TODO If the graph is not connected, there can be no Eulerian Trail
+		// If the graph is not connected, there can be no Eulerian Trail
 		if (!IsConnected())
 		{
 			return Eulerianity::notEulerian;
 		}
 		
-		// TODO Count nodes with odd degree 
+		// Count nodes with odd degree 
 		int AmountOddNodes{ 0 };
 		std::vector<Node*> Nodes{ m_pGraph->GetActiveNodes() };
 		for (Node* Node : Nodes)
@@ -50,18 +50,18 @@ namespace GameAI
 			}
 		}
 		
-		// TODO A connected graph with more than 2 nodes with an odd degree (an odd amount of connections) is not Eulerian
+		// A connected graph with more than 2 nodes with an odd degree (an odd amount of connections) is not Eulerian
 		if (AmountOddNodes > 2)
 			return Eulerianity::notEulerian;
 		
-		// TODO A connected graph with exactly 2 nodes with an odd degree is Semi-Eulerian (unless there are only 2 nodes)
-		// TODO An Euler trail can be made, but only starting and ending in these 2 nodes
+		// A connected graph with exactly 2 nodes with an odd degree is Semi-Eulerian (unless there are only 2 nodes)
+		// An Euler trail can be made, but only starting and ending in these 2 nodes
 		if (AmountOddNodes == 2 && Nodes.size() > 2)
 		{
 			return Eulerianity::semiEulerian;
 		}
 		
-		// TODO A connected graph with no odd nodes is Eulerian
+		// A connected graph with no odd nodes is Eulerian
 		if (AmountOddNodes == 0)
 		{
 			return Eulerianity::eulerian;
@@ -78,8 +78,8 @@ namespace GameAI
 		std::vector<Node*> Nodes = graphCopy.GetActiveNodes();
 		int currentNodeId{ Graphs::InvalidNodeId };
 		
-		// TODO Check if there can be an Euler path
-		// TODO If this graph is not eulerian, return the empty path
+		// Check if there can be an Euler path
+		// If this graph is not eulerian, return the empty path
 		if (eulerianity == Eulerianity::notEulerian)
 			return Path;
 		else if (eulerianity == Eulerianity::semiEulerian)
@@ -98,7 +98,7 @@ namespace GameAI
 			currentNodeId = Nodes[0]->GetId();
 		}
 		
-		// TODO Start algorithm loop
+		// Start algorithm loop
 		std::stack<int> nodeStack;
 		std::vector<Connection*> Connections{ graphCopy.FindConnectionsFrom(currentNodeId) };
 
@@ -174,10 +174,10 @@ namespace GameAI
 
 	inline void EulerianPath::VisitAllNodesDFS(const std::vector<Node*>& Nodes, std::vector<bool>& visited, int startIndex ) const
 	{
-		// TODO Mark the visited node
-		// TODO Ask the graph for the connections from that node
-		// TODO recursively visit any valid connected nodes that were not visited before
-		// TODO Tip: use an index-based for-loop to find the correct index
+		// Mark the visited node
+		// Ask the graph for the connections from that node
+		// recursively visit any valid connected nodes that were not visited before
+		// Tip: use an index-based for-loop to find the correct index
 		
 		visited[startIndex] = true;
 		
@@ -209,9 +209,9 @@ namespace GameAI
 		if (Nodes.size() == 0)
 			return false;
 
-		// TODO choose a starting node
-		// TODO start a depth-first-search traversal from the node that has at least one connection
-		// TODO if a node was never visited, this graph is not connected
+		// choose a starting node
+		// start a depth-first-search traversal from the node that has at least one connection
+		// if a node was never visited, this graph is not connected
 		
 		std::vector<bool> IsVisited{};
 		for (size_t idx{ 0 }; idx < Nodes.size(); ++idx)

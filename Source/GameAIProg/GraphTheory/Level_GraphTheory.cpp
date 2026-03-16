@@ -41,7 +41,7 @@ void ALevel_GraphTheory::BeginPlay()
 		Player->SetCameraProjection(ECameraProjectionMode::Orthographic);
 	}
 	
-	// TODO Make the graph and a couple connected nodes here...
+	// Make the graph and a couple connected nodes here...
 	Graph.AddNode(std::make_unique<Node>(FVector2D(0, 0)));
 	Graph.AddNode(std::make_unique<Node>(FVector2D(200, 200)));
 	Graph.AddNode(std::make_unique<Node>(FVector2D(200, 500)));
@@ -122,9 +122,9 @@ void ALevel_GraphTheory::Tick(float DeltaTime)
 	
 	Renderer.RenderGraph(Graph);
 	
-	// TODO Check if the graph has updated
-	// TODO if so, run the EulerianPath algorithm
-	// TODO if a path is found, have the agent follow it
+	// Check if the graph has updated
+	// if so, run the EulerianPath algorithm
+	// if a path is found, have the agent follow it
 	EulerianPath EulerianPath{ &Graph };
 	Eulerianity Eulerianity{ EulerianPath.IsEulerian() };
 
@@ -139,7 +139,7 @@ void ALevel_GraphTheory::UpdateAgentPath(std::vector<Node*> const& Trail)
 	std::vector<FVector2D> path{};
 	path.reserve(Trail.size());
 	
-	// TODO convert Node vector to positions vecto
+	// convert Node vector to positions vecto
 	for (int idx{ 0 }; idx < Trail.size(); ++idx)
 	{
 		path.push_back(Trail[idx]->GetPosition());

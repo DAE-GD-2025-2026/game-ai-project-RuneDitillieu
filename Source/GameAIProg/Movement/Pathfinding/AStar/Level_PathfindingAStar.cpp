@@ -43,10 +43,10 @@ void ALevel_PathfindingAStar::BeginPlay()
 	// Create graph & renderer
 	Renderer = new GraphRenderer{GetWorld()};
 	GraphRenderOptions RenderOptions{};
-	RenderOptions.bDrawConnectionWeights = false;
-	RenderOptions.bDrawConnections = false;
-	RenderOptions.bDrawNodeIds = false;
-	RenderOptions.bDrawNodes = false;
+	RenderOptions.bDrawConnectionWeights = bDrawConnectionsCosts;
+	RenderOptions.bDrawConnections = bDrawConnections;
+	RenderOptions.bDrawNodeIds = bDrawNodeNumbers;
+	RenderOptions.bDrawNodes = bDrawNodes;
 	Renderer->SetRenderOptions(RenderOptions);
 	
 	NodeFactory = new TerrainNodeFactory{};
@@ -92,9 +92,12 @@ void ALevel_PathfindingAStar::Tick(float DeltaTime)
 	UpdateImGui();
 	
 	Renderer->RenderGraph(*TerrainGraph);
-	TerrainGraph->DebugDrawCells(GetWorld());
-	TerrainGraph->DrawTerrain(GetWorld());
-	// TODO implement conditional debug draws
+	
+	if (bDrawGrid)
+	{
+		TerrainGraph->DebugDrawCells(GetWorld());
+		TerrainGraph->DrawTerrain(GetWorld());
+	}
 }
 
 void ALevel_PathfindingAStar::CalculatePath()
@@ -186,11 +189,31 @@ void ALevel_PathfindingAStar::UpdateImGui()
 		ImGui::Text("A* Pathfinding");
 		ImGui::Spacing();
 		
-		// TODO conditional debug draws
-		// ImGui::Checkbox("Grid", &bDrawGrid);
-		// ImGui::Checkbox("NodeNumbers", &bDrawNodeNumbers);
-		// ImGui::Checkbox("Connections", &bDrawConnections);
-		// ImGui::Checkbox("Connections Costs", &bDrawConnectionsCosts);
+		ImGui::Checkbox("Grid", &bDrawGrid);
+		if (ImGui::Checkbox("Nodes", &bDrawNodes))
+		{
+			GraphRenderOptions renderOptions{ Renderer->GetRenderOptions() };
+			Renderer->SetRenderOptions(GraphRenderOptions(bDrawNodes, bDrawNodeNumbers, renderOptions.bDrawHighlightedNodes, 
+				bDrawConnections, bDrawConnectionsCosts));
+		}
+		if (ImGui::Checkbox("NodeNumbers", &bDrawNodeNumbers))
+		{
+			GraphRenderOptions renderOptions{ Renderer->GetRenderOptions() };
+			Renderer->SetRenderOptions(GraphRenderOptions(bDrawNodes, bDrawNodeNumbers, renderOptions.bDrawHighlightedNodes, 
+				bDrawConnections, bDrawConnectionsCosts));
+		}
+		if (ImGui::Checkbox("Connections", &bDrawConnections))
+		{
+			GraphRenderOptions renderOptions{ Renderer->GetRenderOptions() };
+			Renderer->SetRenderOptions(GraphRenderOptions(bDrawNodes, bDrawNodeNumbers, renderOptions.bDrawHighlightedNodes, 
+				bDrawConnections, bDrawConnectionsCosts));
+		}
+		if (ImGui::Checkbox("Connections Costs", &bDrawConnectionsCosts))
+		{
+			GraphRenderOptions renderOptions{ Renderer->GetRenderOptions() };
+			Renderer->SetRenderOptions(GraphRenderOptions(bDrawNodes, bDrawNodeNumbers, renderOptions.bDrawHighlightedNodes, 
+				bDrawConnections, bDrawConnectionsCosts));
+		}
 		if (ImGui::Combo("", &SelectedHeuristic, "Manhattan\0Euclidean\0SqEuclidean\0Octile\0Chebyshev", 4))
 		{
 			switch (SelectedHeuristic)
