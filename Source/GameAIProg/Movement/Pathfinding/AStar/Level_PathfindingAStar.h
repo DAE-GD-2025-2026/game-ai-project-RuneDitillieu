@@ -70,7 +70,7 @@ private:
 	void SetNodeTerrain(GameAI::TerrainNode::Type TerrainType);
 	
 	// bools
-	bool bDrawGrid{ false };
+	bool bDrawGrid{ true };
 	bool bDrawNodes{ false };
 	bool bDrawNodeNumbers{ false };
 	bool bDrawConnections{ false };
