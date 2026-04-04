@@ -1,5 +1,4 @@
 ﻿#include "NavGraph.h"
-
 #include "NavGraphNode.h"
 
 GameAI::NavGraph::NavGraph(std::unique_ptr<TriPolygon> && NavPoly)
@@ -48,12 +47,54 @@ int GameAI::NavGraph::GetNodeIdFromEdgeIndex(int EdgeIdx) const
 
 void GameAI::NavGraph::CreateNavigationGraph()
 {
-	//1. Go over all the edges of the navigation mesh and create nodes
-			// Create node here
-
-	//2. Create connections now that every node is created	
-		//2 valid nodes -> 1 connection
-		//3 valid nodes -> 3 connections
+	// for every edge
+	for (auto& line : pNavPoly->GetEdges())
+	{
+		int connectedTriangles{ 0 };
+		for (auto& triangle : pNavPoly->GetTriangles())
+		{
+			if (triangle.HasEdge(line))
+			{
+				++connectedTriangles;
+				if (connectedTriangles >= 2)
+					break;
+			}
+		}
 		
-	//3. Set the connections cost to the actual distance
+		// if at least 2 triangles share this edge, add a node in the middle of this edge
+		if (connectedTriangles >= 2)
+		{
+			FVector middle{ line.GetP1(*pNavPoly.get()) + ((line.GetP2(*pNavPoly.get()) - line.GetP1(*pNavPoly.get())) / 2.f) };
+			std::optional<int> lineId{ pNavPoly->FindEdgeIndex(line) };
+			AddNode(std::make_unique<NavGraphNode>(FVector2D(middle.X, middle.Y), lineId.value()));
+		}
+	}
+	
+	// for every triangle
+	for (auto& triangle : pNavPoly->GetTriangles())
+	{
+		std::vector<int> tempNodeIds{};
+		for (auto& line : triangle.GetEdges())
+		{
+			int nodeId{ GetNodeIdFromEdgeIndex(pNavPoly->FindEdgeIndex(line).value()) };
+			if (nodeId != -1)
+			{
+				tempNodeIds.emplace_back(nodeId);
+			}
+		}
+		
+		// connect all nodes on the triangle
+		if (tempNodeIds.size() > 1)
+		{
+			AddConnection(tempNodeIds[0], tempNodeIds[1]);
+		}
+		if (tempNodeIds.size() == 3)
+		{
+			AddConnection(tempNodeIds[1], tempNodeIds[2]);
+			AddConnection(tempNodeIds[2], tempNodeIds[0]);
+		}
+	}
+	
+	// set the weight to the distance
+	SetConnectionCostsToDistances();
 }
