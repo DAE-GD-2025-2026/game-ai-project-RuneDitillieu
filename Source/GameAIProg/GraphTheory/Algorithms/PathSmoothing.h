@@ -113,12 +113,12 @@ public:
 			FVector crossRR{ FVector::CrossProduct(FVector(rightLeg.X, rightLeg.Y, 0),  
 				FVector(newRightLeg.X, newRightLeg.Y, 0)) };
 			
-			if (crossRR.Z < 0) // inwards
+			if (crossRR.Z <= 0) // inwards
 			{
 				//2. See if new line degenerates a line segment - RIGHT
 				FVector crossRL{ FVector::CrossProduct(FVector(leftLeg.X, leftLeg.Y, 0),  
 					FVector(newRightLeg.X, newRightLeg.Y, 0)) };
-				if (crossRL.Z < 0) // cross over left leg
+				if (crossRL.Z <= 0) // cross over left leg
 				{
 					//Leftleg becomes new apex point
 					apexPoint += leftLeg;
@@ -148,12 +148,12 @@ public:
 			FVector crossLL{ FVector::CrossProduct(FVector(leftLeg.X, leftLeg.Y, 0),  
 				FVector(newLeftLeg.X, newLeftLeg.Y, 0)) };
 			
-			if (crossLL.Z > 0) // inwards
+			if (crossLL.Z >= 0) // inwards
 			{
 				//2. See if new line degenerates a line segment - LEFT
 				FVector crossLR{ FVector::CrossProduct(FVector(rightLeg.X, rightLeg.Y, 0),  
 					FVector(newLeftLeg.X, newLeftLeg.Y, 0)) };
-				if (crossLR.Z > 0) // cross over right leg
+				if (crossLR.Z >= 0) // cross over right leg
 				{
 					//Rightleg becomes new apex point
 					apexPoint += rightLeg;
