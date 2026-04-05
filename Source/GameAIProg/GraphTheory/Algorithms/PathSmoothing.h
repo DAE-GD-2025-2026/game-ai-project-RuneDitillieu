@@ -18,12 +18,13 @@ public:
 	//https://gamedev.stackexchange.com/questions/68302/how-does-the-simple-stupid-funnel-algorithm-work
 	static std::vector<NavLine> FindPortals(std::vector<Node*> const & Path, TriPolygon const & NavPoly)
 	{
-		//Container
+		// Container
 		std::vector<NavLine> Portals = {};
 		
+		// add start position
 		Portals.emplace_back(Path[0]->GetPosition(), Path[0]->GetPosition());
 		
-		//For each node received, get it's corresponding line
+		// For each node received, get it's corresponding line
 		for (int idx{ 1 }; idx < Path.size() - 1; ++idx)
 		{
 			auto line = std::find_if(NavPoly.GetEdges().begin(), NavPoly.GetEdges().end(), 
@@ -41,48 +42,30 @@ public:
 					}
 				});
 			
-			//Redetermine it's "orientation" based on the required path (left-right vs right-left) - p1 should be right point
-			int x1{ line->EdgeIndices[0] };
-			int x2{ line->EdgeIndices[1] };
-			FVector v1{ line->GetP1(NavPoly) };
-			FVector v2{ line->GetP2(NavPoly) };
+			// determine it's "orientation" based on the required path (left-right vs right-left) - p1 should be right point
+			FVector vertex1{ line->GetP1(NavPoly) };
+			FVector vertex2{ line->GetP2(NavPoly) };
 			FVector p1{}, p2{};
 			
-			if (idx == 0)
+			FVector prevNodePos{ Path[idx - 1]->GetPosition().X, Path[idx - 1]->GetPosition().Y, 0 };
+			FVector cross{ FVector::CrossProduct(vertex1 - prevNodePos, vertex2 - prevNodePos) };
+			
+			if (cross.Z < 0) // cw
 			{
-				FVector nextNodePos{ Path[1]->GetPosition().X, Path[1]->GetPosition().Y, 0 };
-				FVector cross{ FVector::CrossProduct(v1 - nextNodePos, v2 - nextNodePos) };
-				if (cross.Z < 0) // cw
-				{
-					p1 = v2;
-					p2 = v1;
-				}
-				else if (cross.Z > 0) // ccw
-				{
-					p1 = v1;
-					p2 = v2;
-				}
+				p1 = vertex1;
+				p2 = vertex2;
 			}
-			else
+			else if (cross.Z > 0) // ccw
 			{
-				FVector prevNodePos{ Path[idx - 1]->GetPosition().X, Path[idx - 1]->GetPosition().Y, 0 };
-				FVector cross{ FVector::CrossProduct(v1 - prevNodePos, v2 - prevNodePos) };
-				if (cross.Z < 0) // cw
-				{
-					p1 = v1;
-					p2 = v2;
-				}
-				else if (cross.Z > 0) // ccw
-				{
-					p1 = v2;
-					p2 = v1;
-				}
+				p1 = vertex2;
+				p2 = vertex1;
 			}
-			//Store portal
+			
+			// Store portal
 			Portals.emplace_back(FVector2D(p1.X, p1.Y), FVector2D(p2.X, p2.Y));
 		}
-		//Add degenerate portal to force end evaluation
-		//Portals.emplace_back(FVector2D(0, 0), FVector2D(0, 0));
+		
+		// add end position
 		Portals.emplace_back(Path.back()->GetPosition(), Path.back()->GetPosition());
 				
 		return Portals;
@@ -91,21 +74,22 @@ public:
 	static std::vector<FVector2D> OptimizePortals( std::vector<NavLine> const & Portals, TriPolygon const & NavPoly)
 	{
 		std::vector<FVector2D> Path{};
+		
+		// init apex position and add it to the path
 		FVector2D apexPoint{ Portals[0].P1 + (Portals[0].P2 - Portals[0].P1) / 2.f };
-		int apexIdx{};
 		Path.emplace_back(apexPoint);
 		
-		NavLine currentPortal{};
-		
+		// init legs from apex position to first portal
 		FVector2D rightLeg{ Portals[1].P1 - apexPoint };
 		FVector2D leftLeg{ Portals[1].P2 - apexPoint };
 		int rightLegIdx{ 1 };
 		int leftLegIdx{ 1 };
 		
+		
 		//P1 == right point of portal, P2 == left point of portal
 		for (int idx{ 1 }; idx < Portals.size(); ++idx)
 		{
-			currentPortal = Portals[idx];
+			NavLine currentPortal = Portals[idx];
 			
 			//--- RIGHT CHECK ---
 			//1. See if moving funnel inwards - RIGHT
@@ -120,14 +104,13 @@ public:
 					FVector(newRightLeg.X, newRightLeg.Y, 0)) };
 				if (crossRL.Z <= 0) // cross over left leg
 				{
-					//Leftleg becomes new apex point
+					// Leftleg becomes new apex point
 					apexPoint += leftLeg;
-					apexIdx = leftLegIdx;
-					//idx = leftLegIdx + 1;
 					leftLegIdx = idx;
 					rightLegIdx = idx;
 					Path.emplace_back(apexPoint);
-					//Calculate new legs (if not the end)
+					
+					// Calculate new legs (if not the end)
 					if (idx + 1 < Portals.size())
 					{
 						rightLeg = Portals[rightLegIdx].P1 - apexPoint;
@@ -155,14 +138,13 @@ public:
 					FVector(newLeftLeg.X, newLeftLeg.Y, 0)) };
 				if (crossLR.Z >= 0) // cross over right leg
 				{
-					//Rightleg becomes new apex point
+					// Rightleg becomes new apex point
 					apexPoint += rightLeg;
-					apexIdx = rightLegIdx;
-					//idx = rightLegIdx + 1;
 					rightLegIdx = idx;
 					leftLegIdx = idx;
 					Path.emplace_back(apexPoint);
-					//Calculate new legs (if not the end)
+					
+					// Calculate new legs (if not the end)
 					if (idx + 1 < Portals.size())
 					{
 						rightLeg = Portals[rightLegIdx].P1 - apexPoint;
