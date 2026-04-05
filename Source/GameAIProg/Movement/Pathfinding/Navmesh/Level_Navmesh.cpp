@@ -80,6 +80,8 @@ void ALevel_Navmesh::Tick(float DeltaTime)
 		for (const FVector& Vertex : NavigationGraph->GetNavPolygon()->GetVertices())
 		{
 			DrawDebugPoint(GetWorld(), Vertex, 10.0f, FColor::Cyan);
+			// draw circle aswell bc DebugPoint only gets drawn with a detached camera
+			Debug::DrawTopDownDebugCircle(GetWorld(), Vertex, 10.f, FColor(0, 255, 255));
 		}
 	}
 	
