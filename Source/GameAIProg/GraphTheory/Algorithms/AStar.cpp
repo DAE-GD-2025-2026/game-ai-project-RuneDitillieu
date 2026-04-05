@@ -80,7 +80,7 @@ std::vector<Node*>AStar::FindPath(Node* const pStartNode, Node* const pGoalNode)
 				if (!skipToNextNeighbor)
 				{
 					openList.emplace_back(NodeRecord{ pNextNode, conn, 
-						GCost - GetHeuristicCost(currentNodeRecord.pNode, pNextNode), GCost });
+						GCost, GCost + GetHeuristicCost(pNextNode, pGoalNode) });
 				}
 			}
 			
