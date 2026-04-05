@@ -5,6 +5,7 @@
 #include "VectorTypes.h"
 #include "Shared/Graph/NavGraph/NavGraph.h"
 #include "Shared/Graph/NavGraph/NavGraphNode.h"
+#include "Shared/DebugHelpers.h"
 
 using namespace GameAI;
 
@@ -46,6 +47,8 @@ std::vector<FVector2D> NavMeshPathfinding::FindPath(const FVector2D& startPos, c
 		if (nodeId > -1)
 		{
 			pGraph->AddConnection(startNodeId, nodeId);
+			float dist{ static_cast<float>((pGraph->GetNode(startNodeId)->GetPosition() - pGraph->GetNode(nodeId)->GetPosition()).Length()) };
+			pGraph->FindConnection(startNodeId, nodeId)->SetWeight(dist);
 		}
 		
 	}
@@ -60,13 +63,16 @@ std::vector<FVector2D> NavMeshPathfinding::FindPath(const FVector2D& startPos, c
 		if (nodeId > -1)
 		{
 			pGraph->AddConnection(nodeId, endNodeId);
+			float dist{ static_cast<float>((pGraph->GetNode(endNodeId)->GetPosition() - pGraph->GetNode(nodeId)->GetPosition()).Length()) };
+			pGraph->FindConnection(nodeId, endNodeId)->SetWeight(dist);
 		}
 	}
 	
 	//Run A star on new graph
 
 	AStar astar{ pGraph.get(), HeuristicFunctions::Chebyshev };
-	for (auto* node : astar.FindPath(pGraph->GetNode(startNodeId).get(), pGraph->GetNode(endNodeId).get()))
+	std::vector<Node*> nodePath{ astar.FindPath(pGraph->GetNode(startNodeId).get(), pGraph->GetNode(endNodeId).get()) };
+	for (auto* node : nodePath)
 	{
 		finalPath.emplace_back(node->GetPosition());
 		debugNodePositions.emplace_back(node->GetPosition());
@@ -75,8 +81,8 @@ std::vector<FVector2D> NavMeshPathfinding::FindPath(const FVector2D& startPos, c
 	//Debug Visualisation
 
 	// Extra: Run optimiser on new graph (First check if everything works without SSFA!)
-	// debugPortals = SSFA::FindPortals(nodes, *pNavGraph->GetNavPolygon());
-	// finalPath = SSFA::OptimizePortals(debugPortals, *pNavGraph->GetNavPolygon());
+	 debugPortals = SSFA::FindPortals(nodePath, *pNavGraph->GetNavPolygon());
+	 finalPath = SSFA::OptimizePortals(debugPortals, *pNavGraph->GetNavPolygon());
 	
 	return finalPath;
 }

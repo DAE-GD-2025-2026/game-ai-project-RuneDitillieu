@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Movement/SteeringBehaviors/SteeringAgent.h"
 
 namespace Debug
 {

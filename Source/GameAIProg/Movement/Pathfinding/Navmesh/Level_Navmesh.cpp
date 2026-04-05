@@ -3,6 +3,8 @@
 
 #include "Level_Navmesh.h"
 
+#include <string>
+
 #include "NavigationSystem.h"
 #include "AI/NavigationSystemBase.h"
 #include "GraphTheory/Algorithms/AStar.h"
@@ -10,6 +12,7 @@
 #include "NavMesh/RecastNavMesh.h"
 #include "Runtime/Navmesh/Public/Detour/DetourNavMesh.h"
 #include "Shared/GameAISpectator.h"
+#include "Shared/DebugHelpers.h"
 
 // Helper
 FORCEINLINE FVector RecastToUnreal(const double* RecastVertex)
@@ -97,11 +100,19 @@ void ALevel_Navmesh::Tick(float DeltaTime)
 		}
 	}
 	
-	// Todo: Draw the portals travelled through with SSFA
-	// if (bDrawPortals)
-	// {
-	// 	
-	// }
+	if (bDrawPortals)
+	{
+		for (const GameAI::NavLine& portal : DebugDrawPortals)
+		{
+			FVector p1{ FVector(portal.P1.X, portal.P1.Y, 1) };
+			FVector p2{ FVector(portal.P2.X, portal.P2.Y, 1) };
+			DrawDebugCircle(GetWorld(), p1, 15, 16, FColor(0, 255, 255), false, -1,
+				1, 10,FVector(0, 1, 0), FVector(1, 0, 0), false);
+			DrawDebugCircle(GetWorld(), p2, 15, 16, FColor(255, 150, 0), false, -1,
+				1, 10,FVector(0, 1, 0), FVector(1, 0, 0), false);
+			DrawDebugLine(GetWorld(), p1, p2, FColor(100, 255, 0), false, -1, 1, 3);
+		}
+	}
 	
 	UpdateImGui();
 }
@@ -216,7 +227,7 @@ void ALevel_Navmesh::SetTarget()
 {
 	GameAI::NavMeshPathfinding Pathfinder{};
 	std::vector<FVector2D> Path =  Pathfinder.FindPath(Agent->GetPosition(), 
-	FVector2D{LatestMouseWorldPos}, NavigationGraph.get());
+	FVector2D{LatestMouseWorldPos}, NavigationGraph.get(), DebugDrawPath, DebugDrawPortals);
 
 	DebugDrawPath = Path;
 	
