@@ -5,7 +5,7 @@
 #include <unordered_map>
 
 #include "States/FSMState.h"
-#include "Transitions/FSMTransition.h"
+#include "FSMTransition.h"
 
 namespace GameAI::FSM
 {
@@ -13,15 +13,18 @@ namespace GameAI::FSM
 	{
 	public:
 		void Tick(float DeltaTime);
-		void AddState(std::unique_ptr<State>&& state);
+		void AddState(std::unique_ptr<State>&& state, bool isStartState = false, bool isStopState = false);
 		void AddTransition(std::unique_ptr<Transition>&& transition);
-		void CanTick(bool canTick) { m_CanTick = canTick; }
+		void Start();
+		void Stop();
 		
 	private:
 		std::unordered_map<type_info, std::unique_ptr<State>> m_States{};
 		std::vector<std::unique_ptr<Transition>> m_Transitions{};
 		
 		State* m_ActiveState{ nullptr };
+		State* m_StartState{ nullptr };
+		State* m_StopState{ nullptr };
 		
 		bool m_CanTick{ false };
 	};

@@ -20,11 +20,13 @@ UFSMComponent::UFSMComponent()
 void UFSMComponent::AddState(std::unique_ptr<GameAI::FSM::State>&& NewState)
 {
 	// TODO
+	FSMInstance->AddState(std::move(NewState));
 }
 
 void UFSMComponent::AddTransition(GameAI::FSM::State* From, GameAI::FSM::State* To, std::function<bool()> EvalFunc) const
 {
 	// TODO
+	FSMInstance->AddTransition(std::make_unique<GameAI::FSM::Transition>(From, To, EvalFunc));
 }
 
 // Called when the game starts
@@ -39,6 +41,7 @@ void UFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	// TODO
+	FSMInstance->Tick(DeltaTime);
 }
 
 void UFSMComponent::StartLogic()
@@ -46,11 +49,13 @@ void UFSMComponent::StartLogic()
 	Super::StartLogic();
 
 	// TODO
+	FSMInstance->Start();
 }
 
 void UFSMComponent::StopLogic(const FString& Reason)
 {
 	// TODO
+	FSMInstance->Stop();
 }
 
 bool UFSMComponent::IsRunning() const
