@@ -2,7 +2,6 @@
 #include <memory>
 #include <typeinfo>
 #include <vector>
-#include <unordered_map>
 
 #include "States/FSMState.h"
 #include "FSMTransition.h"
@@ -19,7 +18,7 @@ namespace GameAI::FSM
 		void Stop();
 		
 	private:
-		std::unordered_map<type_info, std::unique_ptr<State>> m_States{};
+		std::vector<std::unique_ptr<State>> m_States{};
 		std::vector<std::unique_ptr<Transition>> m_Transitions{};
 		
 		State* m_ActiveState{ nullptr };

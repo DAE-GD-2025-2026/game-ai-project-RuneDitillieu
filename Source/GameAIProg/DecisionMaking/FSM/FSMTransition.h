@@ -8,8 +8,7 @@ namespace GameAI::FSM
 	public:
 		Transition(State* From, State* To, std::function<bool()> EvalFunc)
 			: m_FromState(From), m_ToState(To), m_EvalFunc(EvalFunc) {}
-		virtual ~Transition() = default;
-		virtual bool Evaluate() { return m_EvalFunc(); }
+		bool Evaluate() { return m_EvalFunc(); }
 		State* GetFromState() { return m_FromState; }
 		State* GetToState() { return m_ToState; }
 	
