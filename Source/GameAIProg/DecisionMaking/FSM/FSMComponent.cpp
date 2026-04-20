@@ -2,6 +2,7 @@
 
 
 #include "FSMComponent.h"
+#include "FSM.h"
 
 
 // Sets default values for this component's properties
@@ -12,6 +13,7 @@ UFSMComponent::UFSMComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// TODO Setup FSM
+	FSMInstance = std::make_unique<GameAI::FSM::FSM>();
 }
 
 
