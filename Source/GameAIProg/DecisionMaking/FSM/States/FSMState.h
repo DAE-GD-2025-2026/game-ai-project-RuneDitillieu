@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "BehaviorTree/BlackboardComponent.h"
 
 namespace GameAI::FSM
 {
@@ -6,6 +7,6 @@ namespace GameAI::FSM
 	{
 	public:
 		virtual ~State() = default;
-		virtual void Tick(float deltaTime);
+		virtual void Tick(TObjectPtr<UBlackboardComponent>& blackboardRef) {}
 	};
 }

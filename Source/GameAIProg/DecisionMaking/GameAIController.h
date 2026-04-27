@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "Perception/AIPerceptionComponent.h"
 #include "GameAIController.generated.h"
 
 UCLASS()
@@ -14,6 +15,8 @@ class GAMEAIPROG_API AGameAIController : public AAIController
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI|FSM")
 	TObjectPtr<UBlackboardData> FSMBlackboardAsset; 
+	
+	TObjectPtr<UAIPerceptionComponent> PerceptionComponent{ CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComponent")) };
 	
 	// Sets default values for this actor's properties
 	AGameAIController();
@@ -26,4 +29,5 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	void InitFiniteStateMachine();
+	
 };

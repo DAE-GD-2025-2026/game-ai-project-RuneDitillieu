@@ -3,6 +3,10 @@
 #include "States/Patrol.h"
 #include "States/Search.h"
 
+GameAI::FSM::FSM::FSM(TObjectPtr<UBlackboardComponent>& blackboardRef)
+	: m_BlackboardRef(blackboardRef)
+{}
+
 void GameAI::FSM::FSM::Tick(float DeltaTime)
 {
 	if (!m_CanTick) return;
@@ -21,7 +25,7 @@ void GameAI::FSM::FSM::Tick(float DeltaTime)
 	}
 	
 	// state behavior
-	m_ActiveState->Tick(DeltaTime);
+	m_ActiveState->Tick(m_BlackboardRef);
 }
 
 void GameAI::FSM::FSM::AddState(std::unique_ptr<State>&& state, bool isStartState, bool isStopState)
@@ -47,8 +51,8 @@ void GameAI::FSM::FSM::AddTransition(std::unique_ptr<Transition>&& transition)
 	if (std::find_if(m_Transitions.begin(), m_Transitions.end(), [&transition](std::unique_ptr<Transition>& t){ return t.get() == transition.get(); } ) == m_Transitions.end())
 	{
 		// if from state and to state have been added
-		if (std::find_if(m_States.begin(), m_States.end(), [&transition](std::unique_ptr<State>& s) { return s.get() == transition->GetFromState(); }) != m_States.end()
-			&& std::find_if(m_States.begin(), m_States.end(), [&transition](std::unique_ptr<State>& s) { return s.get() == transition->GetToState(); }) != m_States.end())
+		//if (std::find_if(m_States.begin(), m_States.end(), [&transition](std::unique_ptr<State>& s) { return s.get() == transition->GetFromState(); }) != m_States.end()
+		//	&& std::find_if(m_States.begin(), m_States.end(), [&transition](std::unique_ptr<State>& s) { return s.get() == transition->GetToState(); }) != m_States.end())
 		{
 			m_Transitions.emplace_back(std::move(transition));
 		}

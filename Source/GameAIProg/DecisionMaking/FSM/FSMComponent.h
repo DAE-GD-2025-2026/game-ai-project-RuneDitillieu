@@ -7,6 +7,7 @@
 
 #include "CoreMinimal.h"
 #include "BrainComponent.h"
+#include "FSM.h"
 #include "FSMComponent.generated.h"
 
 namespace GameAI::FSM

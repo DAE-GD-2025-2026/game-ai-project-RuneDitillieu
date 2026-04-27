@@ -13,7 +13,7 @@ UFSMComponent::UFSMComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// TODO Setup FSM
-	FSMInstance = std::make_unique<GameAI::FSM::FSM>();
+	FSMInstance = std::make_unique<GameAI::FSM::FSM>(BlackboardComp);
 }
 
 

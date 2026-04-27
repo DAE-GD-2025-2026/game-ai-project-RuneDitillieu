@@ -5,12 +5,14 @@
 
 #include "States/FSMState.h"
 #include "FSMTransition.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 namespace GameAI::FSM
 {
 	class FSM
 	{
 	public:
+		FSM(TObjectPtr<UBlackboardComponent>& blackboardRef);
 		void Tick(float DeltaTime);
 		void AddState(std::unique_ptr<State>&& state, bool isStartState = false, bool isStopState = false);
 		void AddTransition(std::unique_ptr<Transition>&& transition);
@@ -26,5 +28,7 @@ namespace GameAI::FSM
 		State* m_StopState{ nullptr };
 		
 		bool m_CanTick{ false };
+		
+		TObjectPtr<UBlackboardComponent> m_BlackboardRef;
 	};
 }
