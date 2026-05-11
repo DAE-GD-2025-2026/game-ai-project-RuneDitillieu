@@ -31,12 +31,11 @@ void ALevel_FSM::BeginPlay()
 	AgentGuard = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, 
 	FVector{100,0,90}, FRotator::ZeroRotator);
 	AgentGuard->SetDebugRenderingEnabled(false);
-	//AgentGuard->SetSteeringBehavior(pSeekBehavior.get());
-	
 	
 	// TODO
 	if (AGameAIController* AIController = Cast<AGameAIController>(AgentGuard->GetController()))
 	{
+		
 		if (UFSMComponent* FSM = Cast<UFSMComponent>(AIController->GetBrainComponent()))
 		{
 			
@@ -90,11 +89,15 @@ void ALevel_FSM::BeginPlay()
 			FSM->AddTransition(search.get(), chase.get(), IsTargetVisible);
 			FSM->AddTransition(chase.get(), search.get(), IsTargetNotVisible);
 			FSM->AddState(std::move(search));
-			FSM->AddState(std::move(patrol));
+			FSM->AddState(std::move(patrol), true, true);
 			FSM->AddState(std::move(chase));
 			
 			AIController->GetBlackboardComponent()->SetValueAsFloat(FName("TimeSearching"), 0.f);
 			AIController->GetBlackboardComponent()->SetValueAsFloat(FName("DeltaTime"), 0.f);
+			
+			std::vector<FVector2D> path{FVector2D(100, -100), FVector2D(100, 0)};
+			//TODO: figure out how to put TArray on blackboard
+			
 			AIController->RunFiniteStateMachine();
 		}
 	} 
@@ -112,6 +115,7 @@ void ALevel_FSM::Tick(float DeltaTime)
 		AIController->GetBlackboardComponent()->SetValueAsFloat(FName("DeltaTime"), DeltaTime);
 		AIController->GetBlackboardComponent()->SetValueAsVector(FName("ThiefPosition"), FVector(Agent->GetPosition().X, Agent->GetPosition().Y, 0));
 		AIController->GetBlackboardComponent()->SetValueAsVector(FName("LastSpottedThiefPosition"), FVector(Agent->GetPosition().X, Agent->GetPosition().Y, 0));
+		AIController->GetBlackboardComponent()->SetValueAsVector(FName("GuardPosition"), FVector(AgentGuard->GetPosition().X, AgentGuard->GetPosition().Y, 0));
 	}
 }
 

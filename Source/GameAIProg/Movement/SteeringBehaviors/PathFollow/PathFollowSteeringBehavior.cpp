@@ -17,6 +17,7 @@ PathFollow::~PathFollow()
 void PathFollow::SetPath(std::vector<FVector2D>& path)
 {
 	pathVec = path;  
+	endReached = false;
 	
 	currentPathIndex = -1;
 	GotoNextPathPoint();
@@ -54,6 +55,8 @@ void PathFollow::GotoNextPathPoint()
 		//We have reached the last node
 		pArrive->SetTarget(PathTarget);
 		pCurrentSteering = pArrive;
+		
+		endReached = true;
 	}
 	else
 	{

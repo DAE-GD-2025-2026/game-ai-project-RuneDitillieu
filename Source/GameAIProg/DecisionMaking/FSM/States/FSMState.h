@@ -7,6 +7,7 @@ namespace GameAI::FSM
 	{
 	public:
 		virtual ~State() = default;
-		virtual void Tick(TObjectPtr<UBlackboardComponent>& blackboardRef) {}
+		virtual void OnEnter(UBlackboardComponent* pBlackboard){}
+		virtual void Tick(UBlackboardComponent* pBlackboard) {}
 	};
 }

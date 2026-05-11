@@ -35,9 +35,11 @@ public:
 	
 	virtual bool IsRunning() const override; 
 	
-	void AddState(std::unique_ptr<GameAI::FSM::State>&& NewState);
+	void AddState(std::unique_ptr<GameAI::FSM::State>&& NewState, bool isStartState = false, bool isStopState = false);
 	void AddTransition(GameAI::FSM::State* From, GameAI::FSM::State* To, std::function<bool()> EvalFunc) const;
 		
+	void SetBlackboard(UBlackboardComponent* pBlackboard) { if (BlackboardComp == nullptr) BlackboardComp = pBlackboard; }
+	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

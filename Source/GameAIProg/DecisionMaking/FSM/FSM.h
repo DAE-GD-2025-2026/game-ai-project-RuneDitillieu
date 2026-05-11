@@ -12,12 +12,13 @@ namespace GameAI::FSM
 	class FSM
 	{
 	public:
-		FSM(TObjectPtr<UBlackboardComponent>& blackboardRef);
+		FSM(UBlackboardComponent* pBlackboard);
 		void Tick(float DeltaTime);
 		void AddState(std::unique_ptr<State>&& state, bool isStartState = false, bool isStopState = false);
 		void AddTransition(std::unique_ptr<Transition>&& transition);
 		void Start();
 		void Stop();
+		void SetBlackboard(UBlackboardComponent* pBlackboard) { if (m_pBlackboard == nullptr) m_pBlackboard = pBlackboard; }
 		
 	private:
 		std::vector<std::unique_ptr<State>> m_States{};
@@ -29,6 +30,6 @@ namespace GameAI::FSM
 		
 		bool m_CanTick{ false };
 		
-		TObjectPtr<UBlackboardComponent> m_BlackboardRef;
+		UBlackboardComponent* m_pBlackboard;
 	};
 }

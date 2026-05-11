@@ -3,8 +3,8 @@
 #include "States/Patrol.h"
 #include "States/Search.h"
 
-GameAI::FSM::FSM::FSM(TObjectPtr<UBlackboardComponent>& blackboardRef)
-	: m_BlackboardRef(blackboardRef)
+GameAI::FSM::FSM::FSM(UBlackboardComponent* pBlackboard)
+	: m_pBlackboard(pBlackboard)
 {}
 
 void GameAI::FSM::FSM::Tick(float DeltaTime)
@@ -19,13 +19,14 @@ void GameAI::FSM::FSM::Tick(float DeltaTime)
 			if (transition->Evaluate())
 			{
 				m_ActiveState = transition->GetToState();
+				m_ActiveState->OnEnter(m_pBlackboard);
 				break;
 			}
 		}
 	}
 	
 	// state behavior
-	m_ActiveState->Tick(m_BlackboardRef);
+	m_ActiveState->Tick(m_pBlackboard);
 }
 
 void GameAI::FSM::FSM::AddState(std::unique_ptr<State>&& state, bool isStartState, bool isStopState)
